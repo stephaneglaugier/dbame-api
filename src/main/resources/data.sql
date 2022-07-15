@@ -1,0 +1,1 @@
+INSERT INTO voters (id, first_name, last_name, dob) VALUES (1234, 'Stephane', 'Augier', '2001-06-18');

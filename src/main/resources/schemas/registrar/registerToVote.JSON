@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "required": [
+    "id",
+    "firstName",
+    "lastName",
+    "dob",
+    "key"
+  ],
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "firstName": {
+      "type": "string"
+    },
+    "lastName": {
+      "type": "string"
+    },
+    "dob": {
+      "type": "string"
+    },
+    "key": {
+      "type": "object",
+      "required": [
+        "bytes"
+      ],
+      "properties": {
+        "bytes": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
