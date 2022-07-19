@@ -1,4 +1,4 @@
-package com.saugier.dbame.registrar.model;
+package com.saugier.dbame.registrar.model.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -10,7 +10,7 @@ public class Ballot implements Serializable {
     private static final String SEPARATOR = "||";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
     @Column
@@ -19,21 +19,19 @@ public class Ballot implements Serializable {
     @Column
     private int randint;
 
+    /**
+     * Returns a 256-bit representation of the Ballot's attributes as a 32-byte String with padded zeros.
+     * @return 0x{id||timestamp||randint}
+     */
     public String to256Hex(){
-        String out = this.toString();
-        if (out.length() > 32) throw new RuntimeException("Ballot is greater than 256 bits.");
-        while (out.length() < 32){
-            out = "0" + out;
-        }
-        return out;
-    }
-
-    @Override
-    public String toString(){
         String out =  new String()
                 .concat(Long.toHexString(id))//.concat(SEPARATOR)
                 .concat(Long.toHexString(timestamp.toInstant().getEpochSecond()))//.concat(SEPARATOR)
                 .concat(Integer.toHexString(randint));
+        if (out.length() > 32) throw new RuntimeException("Ballot is greater than 256 bits.");
+        while (out.length() < 32){
+            out = "0" + out;
+        }
         return out;
     }
 

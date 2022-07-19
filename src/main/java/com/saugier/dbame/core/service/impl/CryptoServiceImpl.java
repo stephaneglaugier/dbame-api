@@ -1,9 +1,9 @@
 package com.saugier.dbame.core.service.impl;
 
+import com.saugier.dbame.core.model.BallotRequest;
+import com.saugier.dbame.core.model.BallotResponse;
 import com.saugier.dbame.core.service.ICryptoService;
-import com.saugier.dbame.registrar.model.Ballot;
-import com.saugier.dbame.registrar.model.BallotResponse;
-import com.saugier.dbame.registrar.model.entity.BallotRequest;
+import com.saugier.dbame.registrar.model.entity.Ballot;
 import com.saugier.dbame.registrar.model.entity.Roll;
 import com.saugier.dbame.registrar.model.entity.SignedBallot;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,8 +13,6 @@ import org.web3j.crypto.Hash;
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.xml.bind.DatatypeConverter;
-import java.io.IOException;
-import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -43,11 +41,6 @@ public class CryptoServiceImpl implements ICryptoService {
     }
 
     @Override
-    public boolean isRelativelyPrime(BigInteger a, BigInteger b){
-        return a.gcd(b).equals(BigInteger.ONE);
-    }
-
-    @Override
     public BigInteger randomlySelect(BigInteger upperBound){
         Random rand = new Random();
         BigInteger out = new BigInteger(upperBound.bitLength(), rand);
@@ -58,82 +51,26 @@ public class CryptoServiceImpl implements ICryptoService {
     }
 
     @Override
-    public BigInteger randomCoprime(BigInteger in){
-        BigInteger out = randomlySelect(in);
-        while (!isRelativelyPrime(in, out)){
-            out = randomlySelect(in);
-        }
-        return out;
-    }
-
-    @Override
-    public BigInteger computePublicKey() {
-        return generator.modPow(privateKey, prime);
-    }
-
-    @Override
-    public Roll EGSignRoll(Roll roll) {
-        HashMap<String, String> sw = EGSign(roll.getY());
+    public Roll sign(Roll roll) {
+        HashMap<String, String> sw = sign(roll.getY());
         roll.setW(sw.get("w"));
         roll.setS(sw.get("s"));
         return roll;
     }
 
-
-    // moderator function
     @Override
-    public Roll encryptRoll(Roll roll) {
-
-        BigInteger _blindFactor = randomlySelect(prime);
-        BigInteger _result = new BigInteger(roll.getY()).modPow(_blindFactor, prime);
-        roll.setY(_result.toString(16));
-        return roll;
-    }
-
-    @Override
-    public SecretKey generateKey() throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        keyGenerator.init(64);
-        return keyGenerator.generateKey();
-    }
-
-    @Override
-    public SealedObject encryptObject(String algorithm, Serializable object,
-                                             SecretKey key, IvParameterSpec iv) throws NoSuchPaddingException,
-            NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-            InvalidKeyException, IOException, IllegalBlockSizeException {
-
-        Cipher cipher = Cipher.getInstance(algorithm);
-        cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-        return new SealedObject(object, cipher);
-    }
-
-    @Override
-    public Serializable decryptObject(String algorithm, SealedObject sealedObject,
-                                             SecretKey key, IvParameterSpec iv) throws NoSuchPaddingException,
-            NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException,
-            ClassNotFoundException, BadPaddingException, IllegalBlockSizeException,
-            IOException {
-
-        Cipher cipher = Cipher.getInstance(algorithm);
-        cipher.init(Cipher.DECRYPT_MODE, key, iv);
-        return (Serializable) sealedObject.getObject(cipher);
-    }
-
-    @Override
-    public SignedBallot sign(Ballot b) {
-        HashMap<String, String> sw = EGSign(b.to256Hex());
+    public SignedBallot sign(Ballot ballot) {
+        HashMap<String, String> sw = sign(ballot.to256Hex());
         SignedBallot out = new SignedBallot();
-        out.setId(b.getId());
-        out.setTimestamp(b.getTimestamp());
-        out.setRandint(b.getRandint());
+        out.setId(ballot.getId());
+        out.setTimestamp(ballot.getTimestamp());
+        out.setRandint(ballot.getRandint());
         out.setW(sw.get("w"));
         out.setS(sw.get("s"));
         return out;
     }
 
-    @Override
-    public HashMap<String, String> EGSign(String message) {
+    private HashMap<String, String> sign(String message) {
         BigInteger _u = randomCoprime(prime.subtract(TWO));
         BigInteger _w = generator.modPow(_u, prime);
         BigInteger _hashedMessage = new BigInteger(Hash.sha256(DatatypeConverter.parseHexBinary(message)));
@@ -143,6 +80,18 @@ public class CryptoServiceImpl implements ICryptoService {
         out.put("s", _s.toString(16));
         out.put("w", _w.toString(16));
         return out;
+    }
+
+    private BigInteger randomCoprime(BigInteger in){
+        BigInteger out = randomlySelect(in);
+        while (!isRelativelyPrime(in, out)){
+            out = randomlySelect(in);
+        }
+        return out;
+    }
+
+    private boolean isRelativelyPrime(BigInteger a, BigInteger b){
+        return a.gcd(b).equals(BigInteger.ONE);
     }
 
     @Override
@@ -170,16 +119,26 @@ public class CryptoServiceImpl implements ICryptoService {
         return DatatypeConverter.printHexBinary(cipherText);
     }
 
-    public static SecretKey generateKey(int n) throws NoSuchAlgorithmException {
+    private IvParameterSpec generateIv(int n) {
+        byte[] iv = new byte[n];
+        new SecureRandom().nextBytes(iv);
+        return new IvParameterSpec(iv);
+    }
+
+    private SecretKey generateKey(int n) throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
         keyGenerator.init(n);
         SecretKey key = keyGenerator.generateKey();
         return key;
     }
 
-    public static IvParameterSpec generateIv(int n) {
-        byte[] iv = new byte[n];
-        new SecureRandom().nextBytes(iv);
-        return new IvParameterSpec(iv);
+    // moderator functions
+    @Override
+    public Roll encrypt(Roll roll) {
+
+        BigInteger _blindFactor = randomlySelect(prime);
+        BigInteger _result = new BigInteger(roll.getY()).modPow(_blindFactor, prime);
+        roll.setY(_result.toString(16));
+        return roll;
     }
 }

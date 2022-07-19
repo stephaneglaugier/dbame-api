@@ -1,16 +1,8 @@
-package com.saugier.dbame.registrar.model.entity;
+package com.saugier.dbame.core.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-
-@Entity
 public class BallotRequest {
 
-    @Id
     private long permutation;
-
-    @Column
     private String mask;
 
     public long getPermutation() {

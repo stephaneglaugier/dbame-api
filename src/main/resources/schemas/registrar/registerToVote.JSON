@@ -9,16 +9,23 @@
   ],
   "properties": {
     "id": {
-      "type": "integer"
+      "type": "integer",
+      "min": 1,
+      "max": 999
     },
     "firstName": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10
     },
     "lastName": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10
     },
     "dob": {
-      "type": "string"
+      "type": "string",
+      "format": "YYYY-MM-DD"
     },
     "roll": {
       "type": "object",
@@ -27,7 +34,9 @@
       ],
       "properties": {
         "y": {
-          "type": "string"
+          "type": "string",
+          "minLength": 32,
+          "maxLength": 32
         }
       }
     }

@@ -1,6 +1,7 @@
-package com.saugier.dbame.registrar.model;
+package com.saugier.dbame.core.model;
 
 public class BallotResponse {
+
     private String ciphertext;
     private String ephemeralKey;
 

@@ -1,52 +1,56 @@
 package com.saugier.dbame.core.service;
 
-import com.saugier.dbame.registrar.model.Ballot;
-import com.saugier.dbame.registrar.model.BallotResponse;
-import com.saugier.dbame.registrar.model.entity.BallotRequest;
-import com.saugier.dbame.registrar.model.entity.SignedBallot;
+import com.saugier.dbame.core.model.BallotRequest;
+import com.saugier.dbame.core.model.BallotResponse;
+import com.saugier.dbame.registrar.model.entity.Ballot;
 import com.saugier.dbame.registrar.model.entity.Roll;
+import com.saugier.dbame.registrar.model.entity.SignedBallot;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.*;
-import javax.crypto.spec.IvParameterSpec;
-import java.io.IOException;
-import java.io.Serializable;
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 
 @Service
 public interface ICryptoService {
 
-    boolean isRelativelyPrime(BigInteger a, BigInteger b);
+    /**
+     * Select a random BigInteger given an upper bound.
+     *
+     * @param upperBound
+     * @throws Exception
+     */
+    BigInteger randomlySelect(BigInteger upperBound) throws Exception;
 
-    BigInteger randomlySelect(BigInteger upperBound);
+    /**
+     * Signs the given ballot, returning a SignedBallot object.
+     *
+     * @param ballot
+     * @throws Exception
+     */
+    SignedBallot sign (Ballot ballot) throws Exception;
 
-    BigInteger randomCoprime(BigInteger in);
+    /**
+     * Signs the given roll.
+     *
+     * @param roll
+     * @throws Exception
+     */
+    Roll sign(Roll roll) throws Exception;
 
-    BigInteger computePublicKey();
+    /**
+     * Encrypts a given roll by masking the y component.
+     *
+     * @param roll
+     * @throws Exception
+     */
+    Roll encrypt(Roll roll) throws Exception;
 
-    Roll EGSignRoll(final Roll roll);
-
-    Roll encryptRoll(Roll roll);
-
-    SecretKey generateKey() throws NoSuchAlgorithmException;
-
-    SealedObject encryptObject(String algorithm, Serializable object,
-                                             SecretKey key, IvParameterSpec iv) throws NoSuchPaddingException,
-            NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-            InvalidKeyException, IOException, IllegalBlockSizeException;
-
-    Serializable decryptObject(String algorithm, SealedObject sealedObject,
-                                             SecretKey key, IvParameterSpec iv) throws NoSuchPaddingException,
-            NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException,
-            ClassNotFoundException, BadPaddingException, IllegalBlockSizeException,
-            IOException;
-
-    SignedBallot sign (Ballot b);
-
-    Object EGSign (String message);
-
+    /**
+     *
+     * @param signedBallot
+     * @param ballotRequest
+     * @return cypher and ephemeral key
+     * @throws Exception
+     */
     BallotResponse encryptBallot(SignedBallot signedBallot, BallotRequest ballotRequest) throws Exception;
+
 }

@@ -30,6 +30,9 @@ public class RegistrarController {
     @Value("${schemas.registrar.registerToVote}")
     private String registerToVoteSchema;
 
+    @Value("${schemas.registrar.requestBallot}")
+    private String requestBallotSchema;
+
     @RequestMapping(
             value = "/registerToVote",
             method = RequestMethod.POST,
@@ -59,13 +62,13 @@ public class RegistrarController {
 
     @RequestMapping(
             value = "/requestBallot",
-            method = RequestMethod.POST)
+            method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<String> requestBallot(HttpEntity<String> httpEntity) throws Exception {
         System.out.println("Received request for ballot");
         String json = httpEntity.getBody();
 
-        // TODO validate schema
+        ISchemaService.validate(json, requestBallotSchema);
 
         String out = registrarService.handleRequestBallot(json);
         return new ResponseEntity<>(out, HttpStatus.OK);

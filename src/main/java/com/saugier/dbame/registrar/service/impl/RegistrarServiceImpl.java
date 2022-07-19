@@ -3,9 +3,9 @@ package com.saugier.dbame.registrar.service.impl;
 import com.google.gson.Gson;
 import com.saugier.dbame.core.service.impl.CryptoServiceImpl;
 import com.saugier.dbame.registrar.exception.AlreadyRegisteredException;
-import com.saugier.dbame.registrar.model.Ballot;
-import com.saugier.dbame.registrar.model.BallotResponse;
-import com.saugier.dbame.registrar.model.entity.BallotRequest;
+import com.saugier.dbame.registrar.model.entity.Ballot;
+import com.saugier.dbame.core.model.BallotResponse;
+import com.saugier.dbame.core.model.BallotRequest;
 import com.saugier.dbame.registrar.model.entity.SignedBallot;
 import com.saugier.dbame.registrar.model.entity.Person;
 import com.saugier.dbame.registrar.model.entity.Roll;
@@ -69,7 +69,7 @@ public class RegistrarServiceImpl implements IRegistrarService {
 
     public Roll registerVoter(Person person) {
 
-        person.setRoll(cryptoService.EGSignRoll(person.getRoll()));
+        person.setRoll(cryptoService.sign(person.getRoll()));
         personDAO.save(person);
 
         person.getRoll().setId(null);

@@ -15,6 +15,13 @@ import java.util.Set;
 @Service
 public interface ISchemaService {
 
+    /**
+     * Validates the contents of a given JSON String according to a given JSON Schema file path
+     *
+     * @param json
+     * @param schemaPath
+     * @throws Exception
+     */
     static void validate(String json, String schemaPath) throws Exception {
 
         InputStream schemaAsStream = new FileInputStream(schemaPath);

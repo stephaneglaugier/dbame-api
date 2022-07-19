@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "required": [
+    "mask",
+    "permutation"
+  ],
+  "properties": {
+    "mask": {
+      "type": "string",
+      "minLength": 32,
+      "maxLength": 32
+    },
+    "permutation": {
+      "type": "integer",
+      "min" : 1
+    }
+  }
+}

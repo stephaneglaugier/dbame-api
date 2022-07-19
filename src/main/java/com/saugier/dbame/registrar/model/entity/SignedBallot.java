@@ -1,7 +1,5 @@
 package com.saugier.dbame.registrar.model.entity;
 
-import com.saugier.dbame.registrar.model.Ballot;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
