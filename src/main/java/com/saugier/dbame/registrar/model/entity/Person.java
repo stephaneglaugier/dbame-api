@@ -8,7 +8,7 @@ import java.util.Date;
 public class Person {
 
     @Id
-    private long id;
+    private Long id;
 
     @Column(name = "first_name")
     private String firstName;
@@ -21,8 +21,8 @@ public class Person {
     private Date dob;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="key_id")
-    private Key key;
+    @JoinColumn(name="roll_id")
+    private Roll roll;
 
     @Override
     public boolean equals(Object o){
@@ -37,11 +37,11 @@ public class Person {
 
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -69,11 +69,11 @@ public class Person {
         this.dob = dob;
     }
 
-    public Key getKey() {
-        return key;
+    public Roll getRoll() {
+        return roll;
     }
 
-    public void setKey(Key key) {
-        this.key = key;
+    public void setRoll(Roll roll) {
+        this.roll = roll;
     }
 }

@@ -1,16 +1,19 @@
 package com.saugier.dbame.registrar.model.entity;
 
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
-public class Roll {
+public class Roll implements Serializable {
 
-    @Id@GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="key_id")
-    private Key key;
+    @Column
+    private String y;
 
     @Column(name = "w")
     private String w;
@@ -18,12 +21,34 @@ public class Roll {
     @Column(name = "s")
     private String s;
 
-    public Key getKey() {
-        return key;
+    public Map<String, String> getYSW() {
+        HashMap<String, String> out = new HashMap();
+        out.put("y", getY());
+        out.put("s", getS());
+        out.put("w", getW());
+        return out;
     }
 
-    public void setKey(Key key) {
-        this.key = key;
+    public void setYSW(Map<String, String> in) {
+        this.setY(in.get("y"));
+        this.setS(in.get("s"));
+        this.setW(in.get("w"));
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getY() {
+        return y;
+    }
+
+    public void setY(String y) {
+        this.y = y;
     }
 
     public String getW() {

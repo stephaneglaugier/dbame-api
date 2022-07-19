@@ -2,16 +2,24 @@ package com.saugier.dbame.registrar.service.impl;
 
 import com.google.gson.Gson;
 import com.saugier.dbame.core.service.impl.CryptoServiceImpl;
+import com.saugier.dbame.registrar.exception.AlreadyRegisteredException;
+import com.saugier.dbame.registrar.model.Ballot;
+import com.saugier.dbame.registrar.model.BallotResponse;
+import com.saugier.dbame.registrar.model.entity.BallotRequest;
+import com.saugier.dbame.registrar.model.entity.SignedBallot;
 import com.saugier.dbame.registrar.model.entity.Person;
 import com.saugier.dbame.registrar.model.entity.Roll;
-import com.saugier.dbame.registrar.repository.IKeyDAO;
+import com.saugier.dbame.registrar.repository.ISignedBallotDAO;
 import com.saugier.dbame.registrar.repository.IPersonDAO;
 import com.saugier.dbame.registrar.repository.IRollDAO;
 import com.saugier.dbame.registrar.service.IRegistrarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class RegistrarServiceImpl implements IRegistrarService {
@@ -23,7 +31,7 @@ public class RegistrarServiceImpl implements IRegistrarService {
     private IPersonDAO personDAO;
 
     @Autowired
-    private IKeyDAO keyDAO;
+    private ISignedBallotDAO ballotDAO;
 
     @Autowired
     private CryptoServiceImpl cryptoService;
@@ -36,31 +44,95 @@ public class RegistrarServiceImpl implements IRegistrarService {
 
         Person person = gson.fromJson(body, Person.class);
 
-        checkRecords(person);
+        try{
+            checkRecords(person);
+        } catch (AlreadyRegisteredException e){
+            e.getRoll().setId(null);
+            return gson.toJson(e.getRoll());
+        }
 
         Roll out = registerVoter(person);
-
         return gson.toJson(out);
     }
 
     private String checkRecords(Person person) throws Exception {
 
         Optional<Person> record = personDAO.findById(person.getId());
-        if (!record.isPresent()) throw new Exception("ERROR: your ID Number was not found in our database");
-        if (!record.get().equals(person)) throw new Exception("ERROR: your details do not match our records");
+        if (!record.isPresent())
+            throw new Exception("ERROR: your ID Number was not found in our database");
+        if (!record.get().equals(person))
+            throw new Exception("ERROR: your details do not match our records");
+        if (record.get().getRoll() != null)
+            throw new AlreadyRegisteredException("ERROR: you have already registered to vote", record.get().getRoll());
         return null;
     }
 
     public Roll registerVoter(Person person) {
 
-        Roll roll = new Roll();
-        roll.setKey(person.getKey());
-        roll = cryptoService.EGSignRoll(roll);
-
-//        keyDAO.save(person.getKey());
-        rollDAO.save(roll);
+        person.setRoll(cryptoService.EGSignRoll(person.getRoll()));
         personDAO.save(person);
 
-        return roll;
+        person.getRoll().setId(null);
+        return person.getRoll();
+    }
+
+
+
+    @Override
+    public String handleGenerateBallots(){
+        if (ballotDAO.count() > 0) {
+            return "Ballots have already been generated";
+        }
+        generateBallots();
+        return "Ballot generation successful";
+    }
+
+    public void generateBallots() {
+        long startTime = System.nanoTime();
+
+        long n = rollDAO.count();
+        List<Long> permutation = generatePermutation(n);
+        List<SignedBallot> ballots = new ArrayList<>();
+        for (int i=0;i<n;i++){
+            Ballot b = new Ballot();
+            b.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+            b.setRandint(ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
+            SignedBallot sb = cryptoService.sign(b);
+            sb.setPermutation(permutation.get(i));
+            ballots.add(sb);
+        }
+        ballotDAO.saveAll(ballots);
+
+        long endTime = System.nanoTime();
+        String execTime = String.format("Ballots generated and signed in %sms",((endTime - startTime)/1000000));
+        System.out.println(execTime);
+    }
+
+    public List<Long> generatePermutation(long n){
+        List<Long> out = new ArrayList<>();
+        for (Long i = new Long(1);i<=n;i++){
+            out.add(i);
+        }
+        Collections.shuffle(out);
+        return out;
+    }
+
+    @Override
+    public String handleRequestBallot(String body) {
+        BallotRequest ballotRequest = gson.fromJson(body, BallotRequest.class);
+
+        Optional<SignedBallot> signedBallot = ballotDAO.findByPermutation(ballotRequest.getPermutation());
+
+        if (signedBallot.isPresent()){
+            try {
+                BallotResponse ballotResponse = cryptoService.encryptBallot(signedBallot.get(), ballotRequest);
+                return gson.toJson(ballotResponse);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return gson.toJson(e);
+            }
+        } else {
+            throw new NoSuchElementException("Ballot does not exist");
+        }
     }
 }

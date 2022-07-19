@@ -5,7 +5,7 @@
     "firstName",
     "lastName",
     "dob",
-    "key"
+    "roll"
   ],
   "properties": {
     "id": {
@@ -20,13 +20,13 @@
     "dob": {
       "type": "string"
     },
-    "key": {
+    "roll": {
       "type": "object",
       "required": [
-        "bytes"
+        "y"
       ],
       "properties": {
-        "bytes": {
+        "y": {
           "type": "string"
         }
       }

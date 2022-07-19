@@ -1,4 +1,4 @@
-package com.saugier.dbame.registrar;
+package com.saugier.dbame;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
