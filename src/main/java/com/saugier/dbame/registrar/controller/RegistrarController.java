@@ -1,8 +1,8 @@
 package com.saugier.dbame.registrar.controller;
 
-import com.google.gson.Gson;
 import com.saugier.dbame.core.service.ISchemaService;
 import com.saugier.dbame.registrar.service.IRegistrarService;
+import com.sun.org.slf4j.internal.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -19,13 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class RegistrarController {
 
     @Autowired
-    Gson gson;
+    Logger log;
 
     @Autowired
     IRegistrarService registrarService;
-
-    @Autowired
-    ISchemaService schemaService;
 
     @Value("${schemas.registrar.registerToVote}")
     private String registerToVoteSchema;
@@ -40,7 +37,7 @@ public class RegistrarController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<String> registerToVote(HttpEntity<String> httpEntity) throws Exception {
-        System.out.println("Received request for registration");
+        log.warn("Received request for registration");
         String json = httpEntity.getBody();
 
         ISchemaService.validate(json, registerToVoteSchema);
@@ -54,10 +51,9 @@ public class RegistrarController {
             method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<String> generateBallots(HttpEntity<String> httpEntity) throws Exception {
-        System.out.println("Received request for ballot generation");
-        // TODO validate schema
-        registrarService.handleGenerateBallots();
-        return new ResponseEntity<>(HttpStatus.OK);
+        log.warn("Received request for ballot generation");
+        String out = registrarService.handleGenerateBallots();
+        return new ResponseEntity<>(out, HttpStatus.OK);
     }
 
     @RequestMapping(
@@ -65,7 +61,7 @@ public class RegistrarController {
             method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<String> requestBallot(HttpEntity<String> httpEntity) throws Exception {
-        System.out.println("Received request for ballot");
+        log.warn("Received request for ballot");
         String json = httpEntity.getBody();
 
         ISchemaService.validate(json, requestBallotSchema);

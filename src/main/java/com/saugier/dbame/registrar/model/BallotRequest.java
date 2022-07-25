@@ -1,4 +1,4 @@
-package com.saugier.dbame.core.model;
+package com.saugier.dbame.registrar.model;
 
 public class BallotRequest {
 

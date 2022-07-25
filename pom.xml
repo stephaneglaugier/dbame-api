@@ -21,7 +21,7 @@
 <!--			<groupId>com.saugier.dbame</groupId>-->
 <!--			<artifactId>dbame-core</artifactId>-->
 <!--			<version>0.0.1-SNAPSHOT</version>-->
-<!--			<scope>system</scope>-->
+<!--			<scope></scope>-->
 <!--			<systemPath>C:/Repos/d-BAME/dbame-registrar/src/main/resources/localJARs/dbame-core.jar</systemPath>-->
 <!--		</dependency>-->
 		<dependency>

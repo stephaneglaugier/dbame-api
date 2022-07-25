@@ -1,16 +1,15 @@
 package com.saugier.dbame.core.config;
 
+import com.sun.org.slf4j.internal.Logger;
+import com.sun.org.slf4j.internal.LoggerFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ApplicationConfig {
 
-//    @Value("${user.key.private}") String pk;
-//    @Value("${global.key.p}") String p;
-//    @Value("${global.key.g}") String g;
-//
-//    @Bean
-//    public ICryptoService cryptoService() {
-//        return new CryptoServiceImpl(pk, p, g);
-//    }
+    @Bean
+    public Logger logger(){
+        return LoggerFactory.getLogger(Logger.class);
+    }
 }

@@ -1,18 +1,21 @@
 package com.saugier.dbame.registrar.service.impl;
 
 import com.google.gson.Gson;
+import com.saugier.dbame.registrar.model.BallotRequest;
+import com.saugier.dbame.registrar.model.BallotResponse;
 import com.saugier.dbame.core.service.impl.CryptoServiceImpl;
 import com.saugier.dbame.registrar.exception.AlreadyRegisteredException;
+import com.saugier.dbame.registrar.exception.IdNotFoundException;
+import com.saugier.dbame.registrar.exception.IncorrectDetailsException;
 import com.saugier.dbame.registrar.model.entity.Ballot;
-import com.saugier.dbame.core.model.BallotResponse;
-import com.saugier.dbame.core.model.BallotRequest;
+import com.saugier.dbame.core.model.entity.Person;
+import com.saugier.dbame.core.model.entity.Roll;
 import com.saugier.dbame.registrar.model.entity.SignedBallot;
-import com.saugier.dbame.registrar.model.entity.Person;
-import com.saugier.dbame.registrar.model.entity.Roll;
+import com.saugier.dbame.core.repository.IPersonDAO;
+import com.saugier.dbame.core.repository.IRollDAO;
 import com.saugier.dbame.registrar.repository.ISignedBallotDAO;
-import com.saugier.dbame.registrar.repository.IPersonDAO;
-import com.saugier.dbame.registrar.repository.IRollDAO;
 import com.saugier.dbame.registrar.service.IRegistrarService;
+import com.sun.org.slf4j.internal.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +26,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class RegistrarServiceImpl implements IRegistrarService {
+
+    @Autowired
+    private Logger log;
 
     @Autowired
     private IRollDAO rollDAO;
@@ -59,9 +65,9 @@ public class RegistrarServiceImpl implements IRegistrarService {
 
         Optional<Person> record = personDAO.findById(person.getId());
         if (!record.isPresent())
-            throw new Exception("ERROR: your ID Number was not found in our database");
+            throw new IdNotFoundException("ERROR: your ID Number was not found in our database", person.getId());
         if (!record.get().equals(person))
-            throw new Exception("ERROR: your details do not match our records");
+            throw new IncorrectDetailsException("ERROR: your details do not match our records", person);
         if (record.get().getRoll() != null)
             throw new AlreadyRegisteredException("ERROR: you have already registered to vote", record.get().getRoll());
         return null;
@@ -76,12 +82,13 @@ public class RegistrarServiceImpl implements IRegistrarService {
         return person.getRoll();
     }
 
-
-
     @Override
     public String handleGenerateBallots(){
         if (ballotDAO.count() > 0) {
             return "Ballots have already been generated";
+        }
+        if (rollDAO.count() < 1){
+            return "No voters have registered yet";
         }
         generateBallots();
         return "Ballot generation successful";
@@ -105,7 +112,7 @@ public class RegistrarServiceImpl implements IRegistrarService {
 
         long endTime = System.nanoTime();
         String execTime = String.format("Ballots generated and signed in %sms",((endTime - startTime)/1000000));
-        System.out.println(execTime);
+        log.warn(execTime);
     }
 
     public List<Long> generatePermutation(long n){

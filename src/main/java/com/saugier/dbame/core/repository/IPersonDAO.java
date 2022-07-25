@@ -1,6 +1,6 @@
-package com.saugier.dbame.registrar.repository;
+package com.saugier.dbame.core.repository;
 
-import com.saugier.dbame.registrar.model.entity.Person;
+import com.saugier.dbame.core.model.entity.Person;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

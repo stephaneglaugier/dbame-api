@@ -1,14 +1,14 @@
 package com.saugier.dbame.registrar.exception;
 
-import com.saugier.dbame.registrar.model.entity.Roll;
+import com.saugier.dbame.core.model.entity.Roll;
 
 public class AlreadyRegisteredException extends Exception{
 
     Roll roll;
 
-    public AlreadyRegisteredException(String message, Roll roll){
+    public AlreadyRegisteredException(String msg, Roll roll){
 
-        super(message);
+        super(msg);
         this.roll = roll;
     }
 
