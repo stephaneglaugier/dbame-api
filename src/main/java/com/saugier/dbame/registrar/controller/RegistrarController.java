@@ -58,7 +58,7 @@ public class RegistrarController {
 
     @RequestMapping(
             value = "/requestBallot",
-            method = RequestMethod.GET)
+            method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<String> requestBallot(HttpEntity<String> httpEntity) throws Exception {
         log.warn("Received request for ballot");

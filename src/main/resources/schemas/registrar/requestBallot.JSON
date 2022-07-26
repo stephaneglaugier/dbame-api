@@ -6,13 +6,11 @@
   ],
   "properties": {
     "mask": {
-      "type": "string",
-      "minLength": 32,
-      "maxLength": 32
+      "type": "string"
     },
     "permutation": {
       "type": "integer",
-      "min" : 1
+      "minimum" : 1
     }
   }
 }

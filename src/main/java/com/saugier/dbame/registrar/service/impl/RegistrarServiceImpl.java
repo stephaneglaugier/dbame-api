@@ -1,8 +1,8 @@
 package com.saugier.dbame.registrar.service.impl;
 
 import com.google.gson.Gson;
-import com.saugier.dbame.registrar.model.BallotRequest;
-import com.saugier.dbame.registrar.model.BallotResponse;
+import com.saugier.dbame.core.model.BallotRequest;
+import com.saugier.dbame.core.model.BallotResponse;
 import com.saugier.dbame.core.service.impl.CryptoServiceImpl;
 import com.saugier.dbame.registrar.exception.AlreadyRegisteredException;
 import com.saugier.dbame.registrar.exception.IdNotFoundException;

@@ -1,9 +1,10 @@
 package com.saugier.dbame.core.service;
 
-import com.saugier.dbame.registrar.model.BallotRequest;
-import com.saugier.dbame.registrar.model.BallotResponse;
-import com.saugier.dbame.registrar.model.entity.Ballot;
+import com.saugier.dbame.core.model.BallotRequest;
+import com.saugier.dbame.core.model.BallotResponse;
 import com.saugier.dbame.core.model.entity.Roll;
+import com.saugier.dbame.moderator.model.entity.EncryptedBallot;
+import com.saugier.dbame.registrar.model.entity.Ballot;
 import com.saugier.dbame.registrar.model.entity.SignedBallot;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +44,15 @@ public interface ICryptoService {
      * @param roll
      * @throws Exception
      */
-    Roll encrypt(Roll roll) throws Exception;
+    EncryptedBallot encrypt(Roll roll) throws Exception;
+
+//    /**
+//     * Encrypts a given roll by masking the y component.
+//     *
+//     * @param roll
+//     * @throws Exception
+//     */
+//    EncryptedBallot encrypt(Roll roll) throws Exception;
 
     /**
      *

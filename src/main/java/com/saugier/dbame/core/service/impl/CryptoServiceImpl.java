@@ -1,9 +1,10 @@
 package com.saugier.dbame.core.service.impl;
 
+import com.saugier.dbame.core.model.BallotRequest;
+import com.saugier.dbame.core.model.BallotResponse;
 import com.saugier.dbame.core.model.entity.Roll;
 import com.saugier.dbame.core.service.ICryptoService;
-import com.saugier.dbame.registrar.model.BallotRequest;
-import com.saugier.dbame.registrar.model.BallotResponse;
+import com.saugier.dbame.moderator.model.entity.EncryptedBallot;
 import com.saugier.dbame.registrar.model.entity.Ballot;
 import com.saugier.dbame.registrar.model.entity.SignedBallot;
 import com.sun.org.slf4j.internal.Logger;
@@ -162,12 +163,17 @@ public class CryptoServiceImpl implements ICryptoService {
 
     // moderator functions
     @Override
-    public Roll encrypt(Roll roll) {
+    public EncryptedBallot encrypt(Roll roll) {
+
+        EncryptedBallot out = new EncryptedBallot();
 
         BigInteger _blindFactor = randomlySelect(prime);
         BigInteger _result = new BigInteger(roll.getY(), DEFAULT_RADIX).modPow(_blindFactor, prime);
         roll.setY(_result.toString(DEFAULT_RADIX));
-        return roll;
+
+        out.setRoll(roll);
+        out.setBlindFactor(_blindFactor.toString(DEFAULT_RADIX));
+        return out;
     }
 
 

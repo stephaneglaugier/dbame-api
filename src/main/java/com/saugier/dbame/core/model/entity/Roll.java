@@ -21,6 +21,19 @@ public class Roll implements Serializable {
     @Column(name = "s")
     private String s;
 
+    @Override
+    public boolean equals(Object o){
+        if (o == this) return true;
+        if (!(o instanceof Roll)) return false;
+        Roll r = (Roll) o;
+        if (id!=r.getId()) return false;
+        if (!y.equalsIgnoreCase(r.getY())) return false;
+        if (!w.equalsIgnoreCase(r.getW())) return false;
+        if (!s.equals(r.getS())) return false;
+        return true;
+
+    }
+
     public Map<String, String> getYSW() {
         HashMap<String, String> out = new HashMap();
         out.put("y", getY());
