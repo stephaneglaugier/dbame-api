@@ -1,4 +1,4 @@
-package com.saugier.dbame.core.model.entity;
+package com.saugier.dbame.registrar.model.entity;
 
 import javax.persistence.*;
 import java.util.Date;

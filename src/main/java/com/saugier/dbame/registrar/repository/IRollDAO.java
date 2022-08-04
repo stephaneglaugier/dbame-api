@@ -1,6 +1,6 @@
 package com.saugier.dbame.core.repository;
 
-import com.saugier.dbame.core.model.entity.Roll;
+import com.saugier.dbame.registrar.model.entity.Roll;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
