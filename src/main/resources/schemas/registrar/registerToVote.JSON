@@ -5,7 +5,7 @@
     "firstName",
     "lastName",
     "dob",
-    "roll"
+    "publicKey"
   ],
   "properties": {
     "id": {
@@ -27,16 +27,8 @@
       "type": "string",
       "format": "YYYY-MM-DD"
     },
-    "roll": {
-      "type": "object",
-      "required": [
-        "y"
-      ],
-      "properties": {
-        "y": {
-          "type": "string"
-        }
-      }
+    "publicKey": {
+      "type": "string"
     }
   }
 }

@@ -1,47 +1,32 @@
-package com.saugier.dbame.registrar.model.entity;
+package com.saugier.dbame.core.model.base;
 
-import javax.persistence.*;
 import java.util.Date;
 
-@Entity
-@Table(name = "voters")
-public class PersonRE {
+/**
+ * Class representing a Person on the electoral roll.
+ */
+public class Person {
 
-    @Id
-    private Long id;
-
-    @Column(name = "first_name")
+    private long id;
     private String firstName;
-
-    @Column(name = "last_name")
     private String lastName;
-
-    @Column(name = "dob")
-    @Temporal(TemporalType.DATE)
     private Date dob;
+    private Roll roll;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="roll_id")
-    private RollRE rollRE;
-
-    @Override
-    public boolean equals(Object o){
-        if (o == this) return true;
-        if (!(o instanceof PersonRE)) return false;
-        PersonRE p = (PersonRE) o;
-        if (id!=p.getId()) return false;
+    public boolean equals(Person p){
+        if (id != p.getId()) return false;
         if (!firstName.equalsIgnoreCase(p.getFirstName())) return false;
         if (!lastName.equalsIgnoreCase(p.getLastName())) return false;
         if (!dob.equals(p.getDob())) return false;
+        if (!roll.equals(p.getRoll())) return false;
         return true;
-
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -69,11 +54,11 @@ public class PersonRE {
         this.dob = dob;
     }
 
-    public RollRE getRoll() {
-        return rollRE;
+    public Roll getRoll() {
+        return roll;
     }
 
-    public void setRoll(RollRE rollRE) {
-        this.rollRE = rollRE;
+    public void setRoll(Roll roll) {
+        this.roll = roll;
     }
 }

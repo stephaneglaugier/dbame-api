@@ -1,5 +1,10 @@
 package com.saugier.dbame.registrar.controller;
 
+import com.google.gson.Gson;
+import com.saugier.dbame.core.model.web.BallotRelayRequest;
+import com.saugier.dbame.core.model.web.BallotRelayResponse;
+import com.saugier.dbame.core.model.web.RegistrationRequest;
+import com.saugier.dbame.core.model.web.RegistrationResponse;
 import com.saugier.dbame.core.service.ISchemaService;
 import com.saugier.dbame.registrar.service.IRegistrarService;
 import com.sun.org.slf4j.internal.Logger;
@@ -22,6 +27,9 @@ public class RegistrarController {
     Logger log;
 
     @Autowired
+    Gson gson;
+
+    @Autowired
     IRegistrarService registrarService;
 
     @Value("${schemas.registrar.registerToVote}")
@@ -39,11 +47,10 @@ public class RegistrarController {
     public ResponseEntity<String> registerToVote(HttpEntity<String> httpEntity) throws Exception {
         log.warn("Received request for registration");
         String json = httpEntity.getBody();
-
         ISchemaService.validate(json, registerToVoteSchema);
-
-        String out = registrarService.handleRegisterToVote(json);
-        return new ResponseEntity<>(out, HttpStatus.OK);
+        RegistrationRequest registrationRequest = gson.fromJson(json, RegistrationRequest.class);
+        RegistrationResponse out = registrarService.handleRegisterToVote(registrationRequest);
+        return new ResponseEntity<>(gson.toJson(out), HttpStatus.OK);
     }
 
     @RequestMapping(
@@ -63,10 +70,9 @@ public class RegistrarController {
     public ResponseEntity<String> requestBallot(HttpEntity<String> httpEntity) throws Exception {
         log.warn("Received request for ballot");
         String json = httpEntity.getBody();
-
         ISchemaService.validate(json, requestBallotSchema);
-
-        String out = registrarService.handleRequestBallot(json);
-        return new ResponseEntity<>(out, HttpStatus.OK);
+        BallotRelayRequest ballotRelayRequest = gson.fromJson(json, BallotRelayRequest.class);
+        BallotRelayResponse out = registrarService.handleRequestBallot(ballotRelayRequest);
+        return new ResponseEntity<>(gson.toJson(out), HttpStatus.OK);
     }
 }

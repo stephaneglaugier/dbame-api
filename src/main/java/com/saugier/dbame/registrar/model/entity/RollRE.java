@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Entity
-public class Roll implements Serializable {
+public class RollRE implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -24,8 +24,8 @@ public class Roll implements Serializable {
     @Override
     public boolean equals(Object o){
         if (o == this) return true;
-        if (!(o instanceof Roll)) return false;
-        Roll r = (Roll) o;
+        if (!(o instanceof RollRE)) return false;
+        RollRE r = (RollRE) o;
         if (id!=r.getId()) return false;
         if (!y.equalsIgnoreCase(r.getY())) return false;
         if (!w.equalsIgnoreCase(r.getW())) return false;

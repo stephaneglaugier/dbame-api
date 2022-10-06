@@ -1,12 +1,7 @@
 package com.saugier.dbame.core.service.impl;
 
-import com.saugier.dbame.core.model.BallotRequest;
-import com.saugier.dbame.core.model.BallotResponse;
-import com.saugier.dbame.core.model.entity.Roll;
+import com.saugier.dbame.core.model.base.*;
 import com.saugier.dbame.core.service.ICryptoService;
-import com.saugier.dbame.moderator.model.entity.EncryptedBallot;
-import com.saugier.dbame.registrar.model.entity.Ballot;
-import com.saugier.dbame.registrar.model.entity.SignedBallot;
 import com.sun.org.slf4j.internal.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,13 +10,11 @@ import org.web3j.crypto.Hash;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
-import javax.xml.bind.DatatypeConverter;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -77,37 +70,29 @@ public class CryptoServiceImpl implements ICryptoService {
         return out;
     }
 
+
+    @Override
+    public Ballot sign(Ballot ballot) throws Exception {
+        ballot.setSignature(sign(ballot.toDatum()));
+        return ballot;
+    }
+
     @Override
     public Roll sign(Roll roll) {
-        HashMap<String, String> sw = sign(roll.getY());
-        roll.setW(sw.get("w"));
-        roll.setS(sw.get("s"));
+        roll.setSignature(sign(roll.getPublicKey()));
         return roll;
     }
 
-    @Override
-    public SignedBallot sign(Ballot ballot) {
-        HashMap<String, String> sw = sign(ballot.to256Hex());
-        SignedBallot out = new SignedBallot();
-        out.setId(ballot.getId());
-        out.setTimestamp(ballot.getTimestamp());
-        out.setRandint(ballot.getRandint());
-        out.setW(sw.get("w"));
-        out.setS(sw.get("s"));
-        return out;
-    }
-
+    @Deprecated
     private HashMap<String, String> sign(String message) {
-        BigInteger _pMinus1 = prime.subtract(BigInteger.ONE);
-        BigInteger _u = randomCoprime(_pMinus1);
-        log.warn(_u.toString(10));
-        BigInteger _w = generator.modPow(_u, prime);
-        BigInteger _hashedMessage = new BigInteger(snip(Hash.sha256(DatatypeConverter.parseHexBinary(message)), 0, 16));
-        BigInteger _s = (_hashedMessage.subtract(privateKey.multiply(_w))).multiply(_u.modInverse(_pMinus1)).mod(_pMinus1);
+
+        Datum datum = new Datum(message);
+        Signature signature = sign(datum);
 
         HashMap<String, String> out = new HashMap();
-        out.put("s", _s.toString(DEFAULT_RADIX));
-        out.put("w", _w.toString(DEFAULT_RADIX));
+        out.put("w", signature.getW().toString());
+        out.put("s", signature.getS().toString());
+
         return out;
     }
 
@@ -120,32 +105,31 @@ public class CryptoServiceImpl implements ICryptoService {
         return out;
     }
 
-
-
-
     @Override
-    public BallotResponse encryptBallot(SignedBallot signedBallot, BallotRequest ballotRequest) throws Exception{
+    public EncryptedBallot encryptBallot(Ballot ballot, Datum maskedY, long permutation) throws Exception{
         BigInteger _q = randomlySelect(prime);
-        BigInteger _y = new BigInteger(ballotRequest.getMask(), DEFAULT_RADIX);
+        BigInteger _y = maskedY.toBigInt();
         BigInteger _k = _y.modPow(_q, prime);
 
-        BallotResponse out = new BallotResponse();
-        out.setCiphertext(AESEncrypt(signedBallot.to256Hex(), _k));
+        EncryptedBallot out = new EncryptedBallot();
+        out.setCypherText(AESEncrypt(ballot.toDatum(), _k));
 
-        BigInteger _Q = generator.modPow(_q, prime);
-        out.setEphemeralKey(_Q.toString(DEFAULT_RADIX));
+        out.setEphemeralKey(new Datum(generator.modPow(_q, prime)));
 
         return out;
     }
 
-    private String AESEncrypt(String message, BigInteger key) throws NoSuchPaddingException, NoSuchAlgorithmException,
+    private Datum AESEncrypt(Datum message, BigInteger key) throws NoSuchPaddingException, NoSuchAlgorithmException,
             InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 
         IvParameterSpec iv = generateIv(DEFAULT_RADIX);
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.ENCRYPT_MODE, generateKey(128));//, iv);
-        byte[] cipherText = cipher.doFinal(message.getBytes());
-        return DatatypeConverter.printHexBinary(cipherText);
+        byte[] cipherText = cipher.doFinal(message.toBytes());
+
+        Datum out = new Datum(cipherText);
+
+        return out;
     }
 
     private IvParameterSpec generateIv(int n) {
@@ -161,27 +145,26 @@ public class CryptoServiceImpl implements ICryptoService {
         return key;
     }
 
-    // moderator functions
-    @Override
-    public EncryptedBallot encrypt(Roll roll) {
-
-        EncryptedBallot out = new EncryptedBallot();
-
-        BigInteger _blindFactor = randomlySelect(prime);
-        BigInteger _result = new BigInteger(roll.getY(), DEFAULT_RADIX).modPow(_blindFactor, prime);
-        roll.setY(_result.toString(DEFAULT_RADIX));
-
-        out.setRoll(roll);
-        out.setBlindFactor(_blindFactor.toString(DEFAULT_RADIX));
-        return out;
-    }
+//    // moderator functions
+//    @Override
+//    public ModeratorRelayME encrypt(RollRE rollRE) {
+//
+//        ModeratorRelayME out = new ModeratorRelayME();
+//
+//        BigInteger _blindFactor = randomlySelect(prime);
+//        BigInteger _result = new BigInteger(rollRE.getY(), DEFAULT_RADIX).modPow(_blindFactor, prime);
+//        rollRE.setY(_result.toString(DEFAULT_RADIX));
+//
+////        out.setRoll(rollRE);
+//        out.setBlindFactor(_blindFactor.toString(DEFAULT_RADIX));
+//        return out;
+//    }
 
 
     @Override
     public boolean validate(Roll roll) {
-        BigInteger _y = new BigInteger(roll.getY(), DEFAULT_RADIX);
-        BigInteger _w = new BigInteger(roll.getW(), DEFAULT_RADIX);
-        BigInteger _s = new BigInteger(roll.getS(), DEFAULT_RADIX);
+        BigInteger _w = roll.getSignature().getW().toBigInt();
+        BigInteger _s = roll.getSignature().getS().toBigInt();
 
         if (_w.compareTo(prime) > -1){
             log.warn("INVALID ROLL: w greater than p");
@@ -192,7 +175,9 @@ public class CryptoServiceImpl implements ICryptoService {
             return false;
         }
 
-        BigInteger _a = generator.modPow(new BigInteger(Arrays.copyOfRange(Hash.sha256(_y.toByteArray()), 0, 16)), prime);
+        BigInteger _hashedMessage = new BigInteger(snip(Hash.sha256(roll.getPublicKey().toBytes() ), 0, 2));
+
+        BigInteger _a = generator.modPow(_hashedMessage, prime);
         BigInteger _b = registrarPublicKey.modPow(_w, prime).multiply(_w.modPow(_s, prime)).mod(prime);
 
         if (_a.compareTo(_b) != 0){
@@ -201,4 +186,49 @@ public class CryptoServiceImpl implements ICryptoService {
         }
         return true;
     }
+
+    @Override
+    public Signature sign(Datum datum) {
+        Signature out = new Signature();
+
+        BigInteger _pMinus1 = prime.subtract(BigInteger.ONE);
+        BigInteger _u = randomCoprime(_pMinus1);
+        BigInteger _w = generator.modPow(_u, prime);
+        BigInteger _hashedMessage = new BigInteger(snip(Hash.sha256(datum.toBytes()), 0, 2));
+        BigInteger _s = (_hashedMessage.subtract(privateKey.multiply(_w))).multiply(_u.modInverse(_pMinus1)).mod(_pMinus1);
+
+        log.warn(_hashedMessage.toString(DEFAULT_RADIX));
+
+        out.setW(new Datum((_w)));
+        out.setS(new Datum((_s)));
+
+        return out;
+    }
+
+    @Override
+    public Mask mask(Datum datum) {
+
+        Mask out = new Mask();
+
+        BigInteger _blindFactor = randomlySelect(prime);
+
+        out.setMask(new Datum(datum.toBigInt().modPow(_blindFactor, prime)));
+        out.setBlindFactor(new Datum(_blindFactor));
+
+        return out;
+    }
+
+    @Override
+    public EncryptedBlindFactor encrypt(Datum blindFactor, Datum voterPublicKey) {
+
+        EncryptedBlindFactor out = new EncryptedBlindFactor();
+        BigInteger _rm = randomlySelect(prime);
+
+        out.setC1(new Datum(generator.modPow(_rm, prime)));
+        out.setC2(new Datum(blindFactor.toBigInt().multiply(voterPublicKey.toBigInt().modPow(_rm, prime))));
+
+        return out;
+    }
+
+
 }

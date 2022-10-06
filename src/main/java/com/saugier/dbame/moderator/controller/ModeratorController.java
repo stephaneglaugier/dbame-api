@@ -1,5 +1,8 @@
 package com.saugier.dbame.moderator.controller;
 
+import com.google.gson.Gson;
+import com.saugier.dbame.core.model.web.BallotRequest;
+import com.saugier.dbame.core.model.web.BallotResponse;
 import com.saugier.dbame.moderator.service.IModeratorService;
 import com.sun.org.slf4j.internal.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +25,9 @@ public class ModeratorController {
     @Autowired
     IModeratorService moderatorService;
 
+    @Autowired
+    Gson gson;
+
 //    @Value("${schemas.moderator.requestBallot}")
 //    private String requestBallotSchema;
 
@@ -32,12 +38,23 @@ public class ModeratorController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<String> requestBallot(HttpEntity<String> httpEntity) throws Exception {
-        log.warn("Received request for ballot");
+        log.warn("Received request for ballot :)");
         String json = httpEntity.getBody();
-
         // TODO validate schema
+        BallotRequest ballotRequest = gson.fromJson(json, BallotRequest.class);
+        BallotResponse out = moderatorService.handleRequestBallot(ballotRequest);
+        return new ResponseEntity<>(gson.toJson(out), HttpStatus.OK);
+    }
 
-        String out = moderatorService.handleRequestBallot(json);
+    @RequestMapping(
+            value = "/generatePermutation",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<String> generatePermutation(HttpEntity<String> httpEntity) throws Exception {
+        log.warn("Received request permutation generation");
+        String out = moderatorService.handleGeneratePermutation();
         return new ResponseEntity<>(out, HttpStatus.OK);
     }
+
+    // TODO read RollREs from Registrar API call
 }

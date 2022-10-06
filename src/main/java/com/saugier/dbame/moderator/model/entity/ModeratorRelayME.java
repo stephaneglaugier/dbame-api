@@ -4,7 +4,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "encrypted_ballots")
-public class EncryptedBallotME {
+public class ModeratorRelayME {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

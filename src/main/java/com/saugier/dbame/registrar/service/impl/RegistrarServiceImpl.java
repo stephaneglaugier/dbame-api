@@ -1,19 +1,25 @@
 package com.saugier.dbame.registrar.service.impl;
 
 import com.google.gson.Gson;
-import com.saugier.dbame.core.model.BallotRequest;
-import com.saugier.dbame.core.model.BallotResponse;
-import com.saugier.dbame.core.service.impl.CryptoServiceImpl;
+import com.saugier.dbame.core.model.base.Ballot;
+import com.saugier.dbame.core.model.base.Datum;
+import com.saugier.dbame.core.model.base.EncryptedBallot;
+import com.saugier.dbame.core.model.base.Person;
+import com.saugier.dbame.core.model.web.BallotRelayRequest;
+import com.saugier.dbame.core.model.web.BallotRelayResponse;
+import com.saugier.dbame.core.model.web.RegistrationRequest;
+import com.saugier.dbame.core.model.web.RegistrationResponse;
+import com.saugier.dbame.core.service.IBaseObjectMapper;
+import com.saugier.dbame.core.service.ICryptoService;
 import com.saugier.dbame.registrar.exception.AlreadyRegisteredException;
 import com.saugier.dbame.registrar.exception.IdNotFoundException;
 import com.saugier.dbame.registrar.exception.IncorrectDetailsException;
-import com.saugier.dbame.registrar.model.entity.Ballot;
-import com.saugier.dbame.core.model.entity.Person;
-import com.saugier.dbame.core.model.entity.Roll;
-import com.saugier.dbame.registrar.model.entity.SignedBallot;
-import com.saugier.dbame.core.repository.IPersonDAO;
-import com.saugier.dbame.core.repository.IRollDAO;
+import com.saugier.dbame.registrar.model.entity.BallotRE;
+import com.saugier.dbame.registrar.model.entity.PersonRE;
+import com.saugier.dbame.registrar.repository.IPersonDAO;
+import com.saugier.dbame.registrar.repository.IRollDAO;
 import com.saugier.dbame.registrar.repository.ISignedBallotDAO;
+import com.saugier.dbame.registrar.service.IRegistrarObjectMapper;
 import com.saugier.dbame.registrar.service.IRegistrarService;
 import com.sun.org.slf4j.internal.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,50 +46,57 @@ public class RegistrarServiceImpl implements IRegistrarService {
     private ISignedBallotDAO ballotDAO;
 
     @Autowired
-    private CryptoServiceImpl cryptoService;
+    private ICryptoService cryptoService;
 
     @Autowired
     private Gson gson;
 
-    @Override
-    public String handleRegisterToVote(String body) throws Exception {
+    @Autowired
+    private IRegistrarObjectMapper registrarObjectMapper;
 
-        Person person = gson.fromJson(body, Person.class);
+    @Autowired
+    private IBaseObjectMapper baseObjectMapper;
+
+    @Override
+    public RegistrationResponse handleRegisterToVote(RegistrationRequest registrationRequest) throws Exception {
+
+        Person person = baseObjectMapper.map(registrationRequest);
 
         try{
             checkRecords(person);
         } catch (AlreadyRegisteredException e){
-            e.getRoll().setId(null);
-            return gson.toJson(e.getRoll());
+            return baseObjectMapper.map(e.getPerson());
         }
 
-        Roll out = registerVoter(person);
-        return gson.toJson(out);
+        RegistrationResponse out = registerVoter(person);
+        return out;
     }
 
     private String checkRecords(Person person) throws Exception {
 
-        Optional<Person> record = personDAO.findById(person.getId());
+        PersonRE personRE = registrarObjectMapper.map(person);
+
+        Optional<PersonRE> record = personDAO.findById(personRE.getId());
         if (!record.isPresent())
-            throw new IdNotFoundException("ERROR: your ID Number was not found in our database", person.getId());
-        if (!record.get().equals(person))
-            throw new IncorrectDetailsException("ERROR: your details do not match our records", person);
+            throw new IdNotFoundException("ERROR: your ID Number was not found in our database", personRE.getId());
+        if (!record.get().equals(personRE))
+            throw new IncorrectDetailsException("ERROR: your details do not match our records", personRE);
         if (record.get().getRoll() != null)
-            throw new AlreadyRegisteredException("ERROR: you have already registered to vote", record.get().getRoll());
+            throw new AlreadyRegisteredException("ERROR: you have already registered to vote", registrarObjectMapper.map(record.get()));
         return null;
     }
 
-    public Roll registerVoter(Person person) {
+    public RegistrationResponse registerVoter(Person person) throws Exception {
 
         person.setRoll(cryptoService.sign(person.getRoll()));
-        personDAO.save(person);
 
-        person.getRoll().setId(null);
-        return person.getRoll();
+        personDAO.save(registrarObjectMapper.map(person));
+
+        return baseObjectMapper.map(person);
     }
 
     @Override
-    public String handleGenerateBallots(){
+    public String handleGenerateBallots() throws Exception {
         if (ballotDAO.count() > 0) {
             return "Ballots have already been generated";
         }
@@ -91,23 +104,24 @@ public class RegistrarServiceImpl implements IRegistrarService {
             return "No voters have registered yet";
         }
         generateBallots();
-        return "Ballot generation successful";
+        return "BallotRE generation successful";
     }
 
-    public void generateBallots() {
+    public void generateBallots() throws Exception {
         long startTime = System.nanoTime();
 
         long n = rollDAO.count();
         List<Long> permutation = generatePermutation(n);
-        List<SignedBallot> ballots = new ArrayList<>();
+        List<BallotRE> ballots = new ArrayList<>();
         for (int i=0;i<n;i++){
             Ballot b = new Ballot();
             b.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
             b.setRandint(ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
-            SignedBallot sb = cryptoService.sign(b);
-            sb.setPermutation(permutation.get(i));
-            ballots.add(sb);
+            Ballot sb = cryptoService.sign(b);
+            BallotRE sbRE = registrarObjectMapper.map(sb, permutation.get(i));
+            ballots.add(sbRE);
         }
+
         ballotDAO.saveAll(ballots);
 
         long endTime = System.nanoTime();
@@ -115,7 +129,7 @@ public class RegistrarServiceImpl implements IRegistrarService {
         log.warn(execTime);
     }
 
-    public List<Long> generatePermutation(long n){
+    private List<Long> generatePermutation(long n){
         List<Long> out = new ArrayList<>();
         for (Long i = new Long(1);i<=n;i++){
             out.add(i);
@@ -125,19 +139,19 @@ public class RegistrarServiceImpl implements IRegistrarService {
     }
 
     @Override
-    public String handleRequestBallot(String body) {
-        BallotRequest ballotRequest = gson.fromJson(body, BallotRequest.class);
+    public BallotRelayResponse handleRequestBallot(BallotRelayRequest ballotRelayRequest) throws Exception {
 
-        Optional<SignedBallot> signedBallot = ballotDAO.findByPermutation(ballotRequest.getPermutation());
+        Optional<BallotRE> record = ballotDAO.findByPermutation(ballotRelayRequest.getPermutation());
 
-        if (signedBallot.isPresent()){
-            try {
-                BallotResponse ballotResponse = cryptoService.encryptBallot(signedBallot.get(), ballotRequest);
-                return gson.toJson(ballotResponse);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return gson.toJson(e);
-            }
+        if (record.isPresent()){
+
+            Ballot ballot = registrarObjectMapper.map(record.get());
+            EncryptedBallot encryptedBallot = cryptoService.encryptBallot(ballot, new Datum(ballotRelayRequest.getMask()), ballotRelayRequest.getPermutation());
+
+            BallotRelayResponse out = baseObjectMapper.map(encryptedBallot);
+
+            return out;
+
         } else {
             throw new NoSuchElementException("Ballot does not exist");
         }

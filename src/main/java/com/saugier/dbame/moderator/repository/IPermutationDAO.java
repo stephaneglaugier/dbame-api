@@ -1,9 +1,9 @@
 package com.saugier.dbame.moderator.repository;
 
-import com.saugier.dbame.moderator.model.entity.ModeratorRelayME;
+import com.saugier.dbame.moderator.model.entity.PermutationME;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface IEncryptedBallotDAO extends CrudRepository<ModeratorRelayME, Long> {
+public interface IPermutationDAO extends CrudRepository<PermutationME, Long> {
 }

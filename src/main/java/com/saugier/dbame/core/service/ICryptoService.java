@@ -1,11 +1,6 @@
 package com.saugier.dbame.core.service;
 
-import com.saugier.dbame.core.model.BallotRequest;
-import com.saugier.dbame.core.model.BallotResponse;
-import com.saugier.dbame.core.model.entity.Roll;
-import com.saugier.dbame.moderator.model.entity.EncryptedBallot;
-import com.saugier.dbame.registrar.model.entity.Ballot;
-import com.saugier.dbame.registrar.model.entity.SignedBallot;
+import com.saugier.dbame.core.model.base.*;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -13,7 +8,13 @@ import java.math.BigInteger;
 @Service
 public interface ICryptoService {
 
+    /**
+     * Return a random coprime BigInteger
+     * @param in
+     * @return
+     */
     BigInteger randomCoprime(BigInteger in);
+
     /**
      * Select a random BigInteger given an upper bound.
      *
@@ -23,15 +24,15 @@ public interface ICryptoService {
     BigInteger randomlySelect(BigInteger upperBound) throws Exception;
 
     /**
-     * Signs the given ballot, returning a SignedBallot object.
+     * Signs the given ballot, returning a Ballot object.
      *
      * @param ballot
      * @throws Exception
      */
-    SignedBallot sign (Ballot ballot) throws Exception;
+    Ballot sign (Ballot ballot) throws Exception;
 
     /**
-     * Signs the given roll.
+     * Signs the given rollRE.
      *
      * @param roll
      * @throws Exception
@@ -39,34 +40,41 @@ public interface ICryptoService {
     Roll sign(Roll roll) throws Exception;
 
     /**
-     * Encrypts a given roll by masking the y component.
      *
-     * @param roll
-     * @throws Exception
-     */
-    EncryptedBallot encrypt(Roll roll) throws Exception;
-
-//    /**
-//     * Encrypts a given roll by masking the y component.
-//     *
-//     * @param roll
-//     * @throws Exception
-//     */
-//    EncryptedBallot encrypt(Roll roll) throws Exception;
-
-    /**
-     *
-     * @param signedBallot
-     * @param ballotRequest
+     * @param ballot
+     * @param maskedY,
+     * @param permutation
      * @return cypher and ephemeral key
      * @throws Exception
      */
-    BallotResponse encryptBallot(SignedBallot signedBallot, BallotRequest ballotRequest) throws Exception;
+    EncryptedBallot encryptBallot(Ballot ballot, Datum maskedY, long permutation) throws Exception;
 
     /**
-     * Validates that a roll's El-Gamal Signature
+     * Validates that a rollRE's El-Gamal Signature is valid
      * @param roll
      * @return
      */
     boolean validate(Roll roll);
+
+    /**
+     * Signs a Datum using El-Gamal signature scheme.
+     * @param datum
+     * @return
+     */
+    Signature sign (Datum datum);
+
+    /**
+     * Masks a given datum, returning the blind factor used.
+     * @param datum
+     * @return
+     */
+    Mask mask(Datum datum);
+
+    /**
+     * Encrypts a blind factor
+     * @param blindFactor
+     * @return
+     */
+    EncryptedBlindFactor encrypt(Datum blindFactor, Datum voterPublicKey);
+
 }

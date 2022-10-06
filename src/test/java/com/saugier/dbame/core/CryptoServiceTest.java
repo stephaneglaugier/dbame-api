@@ -1,6 +1,7 @@
 package com.saugier.dbame.core;
 
-import com.saugier.dbame.core.model.entity.Roll;
+import com.saugier.dbame.core.model.base.Datum;
+import com.saugier.dbame.core.model.base.Roll;
 import com.saugier.dbame.core.service.ICryptoService;
 import com.sun.org.slf4j.internal.Logger;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,6 @@ class CryptoServiceTest {
     void randomlySelectTest() throws Exception {
         BigInteger a = new BigInteger("100");
         BigInteger b = cryptoService.randomlySelect(a);
-        log.warn(b.toString());
         assertTrue(a.compareTo(BigInteger.ZERO) == 1);
         assertTrue(b.compareTo(a) == -1);
     }
@@ -50,7 +50,6 @@ class CryptoServiceTest {
     void randomCoprimeTest() {
         BigInteger a = new BigInteger("100");
         BigInteger b = cryptoService.randomCoprime(a);
-        log.warn(b.toString());
         assertTrue(a.gcd(b).equals(BigInteger.ONE));
         assertTrue(b.compareTo(a) == -1);
     }
@@ -58,7 +57,7 @@ class CryptoServiceTest {
     @Test
     void verifySignedTest() throws Exception {
         Roll roll = new Roll();
-        roll.setY("10f1");
+        roll.setPublicKey(new Datum("10f1"));
         roll = cryptoService.sign(roll);
         assertTrue(cryptoService.validate(roll));
     }

@@ -1,21 +1,21 @@
 package com.saugier.dbame.registrar.exception;
 
-import com.saugier.dbame.core.model.entity.Person;
+import com.saugier.dbame.registrar.model.entity.PersonRE;
 
 public class IncorrectDetailsException extends Exception{
 
-    private Person person;
+    private PersonRE personRE;
 
-    public IncorrectDetailsException(String msg, Person person){
+    public IncorrectDetailsException(String msg, PersonRE personRE){
         super(msg);
-        this.person = person;
+        this.personRE = personRE;
     }
 
-    public Person getPerson() {
-        return person;
+    public PersonRE getPerson() {
+        return personRE;
     }
 
-    public void setPerson(Person person) {
-        this.person = person;
+    public void setPerson(PersonRE personRE) {
+        this.personRE = personRE;
     }
 }
