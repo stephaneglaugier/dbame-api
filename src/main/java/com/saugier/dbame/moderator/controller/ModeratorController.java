@@ -3,9 +3,11 @@ package com.saugier.dbame.moderator.controller;
 import com.google.gson.Gson;
 import com.saugier.dbame.core.model.web.BallotRequest;
 import com.saugier.dbame.core.model.web.BallotResponse;
+import com.saugier.dbame.core.service.ISchemaService;
 import com.saugier.dbame.moderator.service.IModeratorService;
 import com.sun.org.slf4j.internal.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("moderator")
+@RequestMapping("schemas/moderator")
 public class ModeratorController {
 
     @Autowired
@@ -28,8 +30,8 @@ public class ModeratorController {
     @Autowired
     Gson gson;
 
-//    @Value("${schemas.moderator.requestBallot}")
-//    private String requestBallotSchema;
+    @Value("${schemas.moderator.requestBallot}")
+    private String requestBallotSchema;
 
     @RequestMapping(
             value = "/requestBallot",
@@ -40,7 +42,7 @@ public class ModeratorController {
     public ResponseEntity<String> requestBallot(HttpEntity<String> httpEntity) throws Exception {
         log.warn("Received request for ballot :)");
         String json = httpEntity.getBody();
-        // TODO validate schema
+        ISchemaService.validate(json, requestBallotSchema);
         BallotRequest ballotRequest = gson.fromJson(json, BallotRequest.class);
         BallotResponse out = moderatorService.handleRequestBallot(ballotRequest);
         return new ResponseEntity<>(gson.toJson(out), HttpStatus.OK);

@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "required": [
+    "id",
+    "firstName",
+    "lastName",
+    "dob",
+    "publicKey",
+    "s",
+    "w"
+  ],
+  "properties": {
+    "id": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 999
+    },
+    "firstName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10
+    },
+    "lastName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10
+    },
+    "dob": {
+      "type": "string",
+      "format": "YYYY-MM-DD"
+    },
+    "publicKey": {
+      "type": "string"
+    },
+    "s": {
+      "type": "string"
+    },
+    "w": {
+      "type": "string"
+    }
+  }
+}
