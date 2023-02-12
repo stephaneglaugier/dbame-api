@@ -12,8 +12,7 @@ public class RegistrationRequest {
     private String lastName;
     private Date dob;
     private String publicKey;
-    private String s;
-    private String w;
+
 
     public long getId() {
         return id;
@@ -53,21 +52,5 @@ public class RegistrationRequest {
 
     public void setPublicKey(String publicKey) {
         this.publicKey = publicKey;
-    }
-
-    public String getS() {
-        return s;
-    }
-
-    public void setS(String s) {
-        this.s = s;
-    }
-
-    public String getW() {
-        return w;
-    }
-
-    public void setW(String w) {
-        this.w = w;
     }
 }

@@ -9,48 +9,37 @@ public class Datum {
 
     private static int DEFAULT_RADIX = 16;
 
-    private String data;
+    private BigInteger data;
 
     public Datum(){};
 
     public Datum(byte[] data){
-        this.data = data.toString();
+        this.data = new BigInteger(data);
     }
 
     public Datum(String data){
-        this.data = data;
+        this.data = new BigInteger(data, DEFAULT_RADIX);
     }
 
     public Datum(BigInteger data){
-        this.data = data.toString(DEFAULT_RADIX);
+        this.data = data;
     }
 
     public boolean equals(Datum d){
-        return this.toString().equalsIgnoreCase(d.toString());
+        return this.data.equals(d.data);
     }
 
     public byte[] toBytes() {
-        return data.getBytes();
-    }
-
-    public void set(byte[] bytes) {
-        this.data = bytes.toString();
+        return data.toByteArray();
     }
 
     @Override
     public String toString() {
-        return this.data;
-    }
-
-    public void set(String string) {
-        this.data = string;
+        return this.data.toString(DEFAULT_RADIX);
     }
 
     public BigInteger toBigInt() {
-        return new BigInteger(this.data, DEFAULT_RADIX);
+        return this.data;
     }
 
-    public void set(BigInteger bigInteger) {
-        this.data = bigInteger.toString(DEFAULT_RADIX);
-    }
 }

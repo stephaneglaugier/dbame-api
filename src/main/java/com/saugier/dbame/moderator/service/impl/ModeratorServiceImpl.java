@@ -102,6 +102,7 @@ public class ModeratorServiceImpl implements IModeratorService {
             out.setEphemeralKey(ballotRelayResponse.getEphemeralKey());
             out.setEncryptedBlindFactor(baseObjectMapper.map(encryptedBlindFactor));
 
+            log.warn("bi: " + mask.getBlindFactor().toString());
             return out;
         } else {
             throw new InvalidSignatureException("Roll signature was invalid.");

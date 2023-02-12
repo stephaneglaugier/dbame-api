@@ -57,7 +57,7 @@ class CryptoServiceTest {
     @Test
     void verifySignedTest() throws Exception {
         Roll roll = new Roll();
-        roll.setPublicKey(new Datum("10f1"));
+        roll.setPublicKey(new Datum("1234"));
         roll = cryptoService.sign(roll);
         assertTrue(cryptoService.validate(roll));
     }

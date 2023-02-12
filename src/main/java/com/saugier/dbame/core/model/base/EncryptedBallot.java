@@ -7,14 +7,14 @@ package com.saugier.dbame.core.model.base;
  */
 public class EncryptedBallot {
 
-    private Datum cypherText;
+    private String cypherText;
     private Datum ephemeralKey;
 
-    public Datum getCypherText() {
+    public String getCypherText() {
         return cypherText;
     }
 
-    public void setCypherText(Datum cypherText) {
+    public void setCypherText(String cypherText) {
         this.cypherText = cypherText;
     }
 

@@ -2,6 +2,7 @@ package com.saugier.dbame.core.service.impl;
 
 import com.saugier.dbame.core.model.base.*;
 import com.saugier.dbame.core.model.web.BallotRelayResponse;
+import com.saugier.dbame.core.model.web.BallotRequest;
 import com.saugier.dbame.core.model.web.RegistrationRequest;
 import com.saugier.dbame.core.model.web.RegistrationResponse;
 import com.saugier.dbame.core.service.IBaseObjectMapper;
@@ -13,6 +14,19 @@ public class BaseObjectMapperImpl implements IBaseObjectMapper {
     @Override
     public Person map(RegistrationRequest in) {
 
+        Person out = new Person();
+
+        out.setId(in.getId());
+        out.setFirstName(in.getFirstName());
+        out.setLastName(in.getLastName());
+        out.setDob(in.getDob());
+        out.setRoll(new Roll(in.getPublicKey(), null));
+
+        return out;
+    }
+
+    @Override
+    public Person map(BallotRequest in) {
         Person out = new Person();
 
         out.setId(in.getId());

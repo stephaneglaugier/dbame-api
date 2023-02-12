@@ -19,7 +19,7 @@ public class Ballot {
      * Returns a 256-bit representation of the Ballot's attributes as a 32-byte String with padded zeros.
      * @return 0x{id||timestamp||randint}
      */
-    public Datum toDatum(){
+    public String asMessage(){
 
         String _id = pad(Long.toHexString(id), 16);
         String _timestamp = pad(Long.toHexString(timestamp.toInstant().getEpochSecond()), 8);
@@ -31,7 +31,7 @@ public class Ballot {
                 .concat(_timestamp)
                 .concat(_randint);
         if (s.length() != 32) throw new RuntimeException(String.format("Ballot is not 256 bits: %s"));
-        return new Datum(s);
+        return s;
     }
 
     /**

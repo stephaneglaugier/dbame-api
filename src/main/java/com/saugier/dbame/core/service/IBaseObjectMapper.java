@@ -5,6 +5,7 @@ import com.saugier.dbame.core.model.base.EncryptedBlindFactor;
 import com.saugier.dbame.core.model.base.Person;
 import com.saugier.dbame.core.model.base.Signature;
 import com.saugier.dbame.core.model.web.BallotRelayResponse;
+import com.saugier.dbame.core.model.web.BallotRequest;
 import com.saugier.dbame.core.model.web.RegistrationRequest;
 import com.saugier.dbame.core.model.web.RegistrationResponse;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 public interface IBaseObjectMapper {
 
     Person map(RegistrationRequest registrationRequest);
+
+    Person map(BallotRequest registrationRequest);
 
     RegistrationResponse map(Person person);
 

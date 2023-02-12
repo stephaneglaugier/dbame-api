@@ -45,8 +45,10 @@ public class RegistrarObjectMapperImpl implements IRegistrarObjectMapper {
         RollRE out = new RollRE();
 
         out.setY(in.getPublicKey().toString());
-        out.setW(in.getSignature().getW().toString());
-        out.setS(in.getSignature().getS().toString());
+        if (in.getSignature() != null) {
+            out.setW(in.getSignature().getW().toString());
+            out.setS(in.getSignature().getS().toString());
+        }
 
         return out;
     }

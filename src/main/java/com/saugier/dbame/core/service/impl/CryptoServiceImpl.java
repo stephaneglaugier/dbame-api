@@ -3,19 +3,19 @@ package com.saugier.dbame.core.service.impl;
 import com.saugier.dbame.core.model.base.*;
 import com.saugier.dbame.core.service.ICryptoService;
 import com.sun.org.slf4j.internal.Logger;
+import org.apache.commons.codec.binary.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Hash;
 
-import javax.crypto.*;
+import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.HashMap;
+import java.security.Key;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Random;
 
 @Service
@@ -73,7 +73,7 @@ public class CryptoServiceImpl implements ICryptoService {
 
     @Override
     public Ballot sign(Ballot ballot) throws Exception {
-        ballot.setSignature(sign(ballot.toDatum()));
+        ballot.setSignature(sign(ballot.asMessage()));
         return ballot;
     }
 
@@ -83,15 +83,46 @@ public class CryptoServiceImpl implements ICryptoService {
         return roll;
     }
 
-    @Deprecated
-    private HashMap<String, String> sign(String message) {
+//    @Deprecated
+//    private HashMap<String, String> sign(String message) {
+//
+//        Datum datum = new Datum(message);
+//        Signature signature = sign(datum);
+//
+//        HashMap<String, String> out = new HashMap();
+//        out.put("w", signature.getW().toString());
+//        out.put("s", signature.getS().toString());
+//
+//        return out;
+//    }
 
-        Datum datum = new Datum(message);
-        Signature signature = sign(datum);
+    public Signature sign(String s) {
+        Signature out = new Signature();
 
-        HashMap<String, String> out = new HashMap();
-        out.put("w", signature.getW().toString());
-        out.put("s", signature.getS().toString());
+        BigInteger _pMinus1 = prime.subtract(BigInteger.ONE);
+        BigInteger _u = randomCoprime(_pMinus1);
+        BigInteger _w = generator.modPow(_u, prime);
+        BigInteger _hashedMessage = new BigInteger(snip(Hash.sha256(s.getBytes()), 0, 2));
+        BigInteger _s = (_hashedMessage.subtract(privateKey.multiply(_w))).multiply(_u.modInverse(_pMinus1)).mod(_pMinus1);
+
+        out.setW(new Datum((_w)));
+        out.setS(new Datum((_s)));
+
+        return out;
+    }
+
+    @Override
+    public Signature sign(Datum datum) {
+        Signature out = new Signature();
+
+        BigInteger _pMinus1 = prime.subtract(BigInteger.ONE);
+        BigInteger _u = randomCoprime(_pMinus1);
+        BigInteger _w = generator.modPow(_u, prime);
+        BigInteger _hashedMessage = new BigInteger(snip(Hash.sha256(datum.toBytes()), 0, 2));
+        BigInteger _s = (_hashedMessage.subtract(privateKey.multiply(_w))).multiply(_u.modInverse(_pMinus1)).mod(_pMinus1);
+
+        out.setW(new Datum((_w)));
+        out.setS(new Datum((_s)));
 
         return out;
     }
@@ -112,37 +143,67 @@ public class CryptoServiceImpl implements ICryptoService {
         BigInteger _k = _y.modPow(_q, prime);
 
         EncryptedBallot out = new EncryptedBallot();
-        out.setCypherText(AESEncrypt(ballot.toDatum(), _k));
+        out.setCypherText(AESEncrypt(ballot.asMessage(), _k));
 
         out.setEphemeralKey(new Datum(generator.modPow(_q, prime)));
 
         return out;
     }
 
-    private Datum AESEncrypt(Datum message, BigInteger key) throws NoSuchPaddingException, NoSuchAlgorithmException,
-            InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    private String AESEncrypt(String message, BigInteger password) throws Exception {
 
-        IvParameterSpec iv = generateIv(DEFAULT_RADIX);
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.ENCRYPT_MODE, generateKey(128));//, iv);
-        byte[] cipherText = cipher.doFinal(message.toBytes());
+//        byte[] salt = Hex.decodeHex("123456");
+//        int iterationCount = 100;
+//        int keySize = 128;
+//        byte[] iv = Hex.decodeHex("F27D5C9927726BCEFE7510B1BDD3D137");
+//
+//        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+//
+//        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+//        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, iterationCount, keySize);
+//        SecretKey key = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
+//
+//        cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
+//        byte[] encrypted = cipher.doFinal(message.getBytes());
+//
+//        String encoded = Base64.getEncoder().encodeToString(encrypted);
+//
+//        return encoded;
 
-        Datum out = new Datum(cipherText);
 
-        return out;
-    }
+        log.warn("message = " + message);
+        log.warn("password = " + password.toString(DEFAULT_RADIX));
 
-    private IvParameterSpec generateIv(int n) {
-        byte[] iv = new byte[n];
-        new SecureRandom().nextBytes(iv);
-        return new IvParameterSpec(iv);
-    }
+        byte[] fLBAKey = java.util.Arrays.copyOf(password.toByteArray() , 32);
+        log.warn("fLBAKey = " + Arrays.toString(fLBAKey));
 
-    private SecretKey generateKey(int n) throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        keyGenerator.init(n);
-        SecretKey key = keyGenerator.generateKey();
-        return key;
+        Key secretKey = new SecretKeySpec(fLBAKey, "AES");
+        log.warn("secretKey = " + Arrays.toString(secretKey.getEncoded()));
+
+        byte[] iv = Hex.decodeHex("F27D5C9927726BCEFE7510B1BDD3D137");
+
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv));
+
+        byte[] encrypted = cipher.doFinal(message.getBytes());
+        String encoded = Base64.getEncoder().encodeToString(encrypted);
+        log.warn("encrypted = " + Arrays.toString(encrypted));
+        log.warn("encoded = " + encoded);
+
+        Key secretKey2 = new SecretKeySpec(fLBAKey, "AES");
+        log.warn("secretKey2 = " + Arrays.toString(secretKey2.getEncoded()));
+
+        Cipher cipher2 = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher2.init(Cipher.DECRYPT_MODE, secretKey2, new IvParameterSpec(iv));
+
+
+        byte[] decoded = Base64.getDecoder().decode(encoded);
+        byte[] decrypted = cipher2.doFinal(decoded);
+        log.warn("decoded = " + Arrays.toString(decoded));
+        log.warn("decrypted = " + new String(decrypted));
+
+        return encoded;
     }
 
 //    // moderator functions
@@ -180,29 +241,11 @@ public class CryptoServiceImpl implements ICryptoService {
         BigInteger _a = generator.modPow(_hashedMessage, prime);
         BigInteger _b = registrarPublicKey.modPow(_w, prime).multiply(_w.modPow(_s, prime)).mod(prime);
 
-        if (_a.compareTo(_b) != 0){
+        if (_a.mod(prime).compareTo(_b.mod(prime)) != 0){
             log.warn(String.format("INVALID ROLL: %s != %s", _a.toString(DEFAULT_RADIX), _b.toString(DEFAULT_RADIX)));
             return false;
         }
         return true;
-    }
-
-    @Override
-    public Signature sign(Datum datum) {
-        Signature out = new Signature();
-
-        BigInteger _pMinus1 = prime.subtract(BigInteger.ONE);
-        BigInteger _u = randomCoprime(_pMinus1);
-        BigInteger _w = generator.modPow(_u, prime);
-        BigInteger _hashedMessage = new BigInteger(snip(Hash.sha256(datum.toBytes()), 0, 2));
-        BigInteger _s = (_hashedMessage.subtract(privateKey.multiply(_w))).multiply(_u.modInverse(_pMinus1)).mod(_pMinus1);
-
-        log.warn(_hashedMessage.toString(DEFAULT_RADIX));
-
-        out.setW(new Datum((_w)));
-        out.setS(new Datum((_s)));
-
-        return out;
     }
 
     @Override

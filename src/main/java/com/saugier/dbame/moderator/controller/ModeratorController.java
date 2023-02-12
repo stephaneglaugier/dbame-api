@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("schemas/moderator")
+@RequestMapping("/moderator")
 public class ModeratorController {
 
     @Autowired
@@ -35,7 +35,7 @@ public class ModeratorController {
 
     @RequestMapping(
             value = "/requestBallot",
-            method = RequestMethod.GET,
+            method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
