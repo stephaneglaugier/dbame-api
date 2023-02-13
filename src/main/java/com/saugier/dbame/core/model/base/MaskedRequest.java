@@ -1,28 +1,25 @@
 package com.saugier.dbame.core.model.base;
 
+import java.math.BigInteger;
+
 /**
  * Masked ballot request created and sent by the Moderator to the Registrar
  */
 public class MaskedRequest {
 
-    private Datum maskedData;
+    private BigInteger maskedData;
     private long permutation;
 
-
-    public MaskedRequest(){
-        this.maskedData = new Datum();
-    }
-
-    public MaskedRequest(Datum maskedData, long permutation){
+    public MaskedRequest(BigInteger maskedData, long permutation){
         this.maskedData = maskedData;
         this.permutation = permutation;
     }
 
-    public Datum getMaskedData() {
+    public BigInteger getMaskedData() {
         return maskedData;
     }
 
-    public void setMaskedData(Datum maskedData) {
+    public void setMaskedData(BigInteger maskedData) {
         this.maskedData = maskedData;
     }
 

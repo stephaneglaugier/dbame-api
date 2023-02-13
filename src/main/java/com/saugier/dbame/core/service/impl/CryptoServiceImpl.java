@@ -25,13 +25,13 @@ public class CryptoServiceImpl implements ICryptoService {
     Logger log;
 
     public static int DEFAULT_RADIX = 16;
-    BigInteger TWO = new BigInteger("2");
+    java.math.BigInteger TWO = new java.math.BigInteger("2");
 
-    private final BigInteger privateKey;
-    private final BigInteger prime;
-    private final BigInteger generator;
-    private final BigInteger registrarPublicKey;
-    private final BigInteger moderatorPublicKey;
+    private final java.math.BigInteger privateKey;
+    private final java.math.BigInteger prime;
+    private final java.math.BigInteger generator;
+    private final java.math.BigInteger registrarPublicKey;
+    private final java.math.BigInteger moderatorPublicKey;
 
     public CryptoServiceImpl(
             @Value("${user.key.private}") String pk,
@@ -40,32 +40,32 @@ public class CryptoServiceImpl implements ICryptoService {
             @Value("${registrar.key.public}") String rpk,
             @Value("${moderator.key.public}") String mpk
     ){
-        privateKey = new BigInteger(pk, DEFAULT_RADIX);
-        prime = new BigInteger(p, DEFAULT_RADIX);
-        generator = new BigInteger(g, DEFAULT_RADIX);
-        registrarPublicKey = new BigInteger(rpk, DEFAULT_RADIX);
-        moderatorPublicKey = new BigInteger(mpk, DEFAULT_RADIX);
+        privateKey = new java.math.BigInteger(pk, DEFAULT_RADIX);
+        prime = new java.math.BigInteger(p, DEFAULT_RADIX);
+        generator = new java.math.BigInteger(g, DEFAULT_RADIX);
+        registrarPublicKey = new java.math.BigInteger(rpk, DEFAULT_RADIX);
+        moderatorPublicKey = new java.math.BigInteger(mpk, DEFAULT_RADIX);
     }
 
     @Override
-    public BigInteger randomCoprime(BigInteger in){
-        BigInteger out = randomlySelect(in);
+    public java.math.BigInteger randomCoprime(java.math.BigInteger in){
+        java.math.BigInteger out = randomlySelect(in);
         while (!isRelativelyPrime(in, out)){
             out = randomlySelect(in);
         }
         return out;
     }
 
-    private boolean isRelativelyPrime(BigInteger a, BigInteger b){
-        return a.gcd(b).equals(BigInteger.ONE);
+    private boolean isRelativelyPrime(java.math.BigInteger a, java.math.BigInteger b){
+        return a.gcd(b).equals(java.math.BigInteger.ONE);
     }
 
     @Override
-    public BigInteger randomlySelect(BigInteger upperBound){
+    public java.math.BigInteger randomlySelect(java.math.BigInteger upperBound){
         Random rand = new Random();
-        BigInteger out = new BigInteger(upperBound.bitLength(), rand);
+        java.math.BigInteger out = new java.math.BigInteger(upperBound.bitLength(), rand);
         while( out.compareTo(upperBound) > 0 ) {
-            out = new BigInteger(upperBound.bitLength(), rand);
+            out = new java.math.BigInteger(upperBound.bitLength(), rand);
         }
         return out;
     }
@@ -83,48 +83,54 @@ public class CryptoServiceImpl implements ICryptoService {
         return roll;
     }
 
-//    @Deprecated
-//    private HashMap<String, String> sign(String message) {
-//
-//        Datum datum = new Datum(message);
-//        Signature signature = sign(datum);
-//
-//        HashMap<String, String> out = new HashMap();
-//        out.put("w", signature.getW().toString());
-//        out.put("s", signature.getS().toString());
-//
-//        return out;
-//    }
-
     public Signature sign(String s) {
-        Signature out = new Signature();
+        return sign(s.getBytes());
+    }
 
-        BigInteger _pMinus1 = prime.subtract(BigInteger.ONE);
-        BigInteger _u = randomCoprime(_pMinus1);
-        BigInteger _w = generator.modPow(_u, prime);
-        BigInteger _hashedMessage = new BigInteger(snip(Hash.sha256(s.getBytes()), 0, 2));
-        BigInteger _s = (_hashedMessage.subtract(privateKey.multiply(_w))).multiply(_u.modInverse(_pMinus1)).mod(_pMinus1);
+    public Signature sign(BigInteger bigInteger) {
+        return sign(bigInteger.toByteArray());
+    }
 
-        out.setW(new Datum((_w)));
-        out.setS(new Datum((_s)));
+    public Signature sign(byte[] bytes) {
+
+        java.math.BigInteger _pMinus1 = prime.subtract(java.math.BigInteger.ONE);
+        java.math.BigInteger _u = randomCoprime(_pMinus1);
+        java.math.BigInteger _w = generator.modPow(_u, prime);
+        java.math.BigInteger _hashedMessage = new java.math.BigInteger(Hash.sha256(bytes));
+        java.math.BigInteger _s =
+                (_hashedMessage.subtract(privateKey.multiply(_w)))
+                        .multiply(_u.modInverse(_pMinus1))
+                        .mod(_pMinus1);
+
+        Signature out = new Signature(_w, _s);
 
         return out;
     }
 
     @Override
-    public Signature sign(Datum datum) {
-        Signature out = new Signature();
+    public boolean validate(Roll roll) {
+        java.math.BigInteger _w = roll.getSignature().getW();
+        java.math.BigInteger _s = roll.getSignature().getS();
 
-        BigInteger _pMinus1 = prime.subtract(BigInteger.ONE);
-        BigInteger _u = randomCoprime(_pMinus1);
-        BigInteger _w = generator.modPow(_u, prime);
-        BigInteger _hashedMessage = new BigInteger(snip(Hash.sha256(datum.toBytes()), 0, 2));
-        BigInteger _s = (_hashedMessage.subtract(privateKey.multiply(_w))).multiply(_u.modInverse(_pMinus1)).mod(_pMinus1);
+        if (_w.compareTo(prime) > -1){
+            log.warn("INVALID ROLL: w greater than p");
+            return false;
+        }
+        if (_s.compareTo(prime.subtract(java.math.BigInteger.ONE)) > -1){
+            log.warn("INVALID ROLL: s greater than p-1");
+            return false;
+        }
 
-        out.setW(new Datum((_w)));
-        out.setS(new Datum((_s)));
+        java.math.BigInteger _hashedMessage = new java.math.BigInteger(Hash.sha256(roll.getPublicKey().toByteArray()));
 
-        return out;
+        java.math.BigInteger _a = generator.modPow(_hashedMessage, prime);
+        java.math.BigInteger _b = registrarPublicKey.modPow(_w, prime).multiply(_w.modPow(_s, prime)).mod(prime);
+
+        if (_a.mod(prime).compareTo(_b.mod(prime)) != 0){
+            log.warn(String.format("INVALID ROLL: %s != %s", _a.toString(DEFAULT_RADIX), _b.toString(DEFAULT_RADIX)));
+            return false;
+        }
+        return true;
     }
 
     private byte[] snip( byte[] in, int from, int to){
@@ -137,15 +143,14 @@ public class CryptoServiceImpl implements ICryptoService {
     }
 
     @Override
-    public EncryptedBallot encryptBallot(Ballot ballot, Datum maskedY, long permutation) throws Exception{
+    public EncryptedBallot encryptBallot(Ballot ballot, BigInteger maskedY, long permutation) throws Exception{
         BigInteger _q = randomlySelect(prime);
-        BigInteger _y = maskedY.toBigInt();
-        BigInteger _k = _y.modPow(_q, prime);
+        BigInteger _k = maskedY.modPow(_q, prime);
 
         EncryptedBallot out = new EncryptedBallot();
         out.setCypherText(AESEncrypt(ballot.asMessage(), _k));
 
-        out.setEphemeralKey(new Datum(generator.modPow(_q, prime)));
+        out.setEphemeralKey(generator.modPow(_q, prime));
 
         return out;
     }
@@ -206,72 +211,26 @@ public class CryptoServiceImpl implements ICryptoService {
         return encoded;
     }
 
-//    // moderator functions
-//    @Override
-//    public ModeratorRelayME encrypt(RollRE rollRE) {
-//
-//        ModeratorRelayME out = new ModeratorRelayME();
-//
-//        BigInteger _blindFactor = randomlySelect(prime);
-//        BigInteger _result = new BigInteger(rollRE.getY(), DEFAULT_RADIX).modPow(_blindFactor, prime);
-//        rollRE.setY(_result.toString(DEFAULT_RADIX));
-//
-////        out.setRoll(rollRE);
-//        out.setBlindFactor(_blindFactor.toString(DEFAULT_RADIX));
-//        return out;
-//    }
-
-
     @Override
-    public boolean validate(Roll roll) {
-        BigInteger _w = roll.getSignature().getW().toBigInt();
-        BigInteger _s = roll.getSignature().getS().toBigInt();
+    public Mask mask(BigInteger bigInteger) {
 
-        if (_w.compareTo(prime) > -1){
-            log.warn("INVALID ROLL: w greater than p");
-            return false;
-        }
-        if (_s.compareTo(prime.subtract(BigInteger.ONE)) > -1){
-            log.warn("INVALID ROLL: s greater than p-1");
-            return false;
-        }
+        BigInteger blindFactor = randomlySelect(prime);
+        BigInteger mask = bigInteger.modPow(blindFactor, prime);
 
-        BigInteger _hashedMessage = new BigInteger(snip(Hash.sha256(roll.getPublicKey().toBytes() ), 0, 2));
-
-        BigInteger _a = generator.modPow(_hashedMessage, prime);
-        BigInteger _b = registrarPublicKey.modPow(_w, prime).multiply(_w.modPow(_s, prime)).mod(prime);
-
-        if (_a.mod(prime).compareTo(_b.mod(prime)) != 0){
-            log.warn(String.format("INVALID ROLL: %s != %s", _a.toString(DEFAULT_RADIX), _b.toString(DEFAULT_RADIX)));
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public Mask mask(Datum datum) {
-
-        Mask out = new Mask();
-
-        BigInteger _blindFactor = randomlySelect(prime);
-
-        out.setMask(new Datum(datum.toBigInt().modPow(_blindFactor, prime)));
-        out.setBlindFactor(new Datum(_blindFactor));
+        Mask out = new Mask(mask, blindFactor);
 
         return out;
     }
 
     @Override
-    public EncryptedBlindFactor encrypt(Datum blindFactor, Datum voterPublicKey) {
+    public EncryptedBlindFactor encrypt(BigInteger blindFactor, BigInteger voterPublicKey) {
 
-        EncryptedBlindFactor out = new EncryptedBlindFactor();
-        BigInteger _rm = randomlySelect(prime);
+        java.math.BigInteger _rm = randomlySelect(prime);
 
-        out.setC1(new Datum(generator.modPow(_rm, prime)));
-        out.setC2(new Datum(blindFactor.toBigInt().multiply(voterPublicKey.toBigInt().modPow(_rm, prime))));
+        BigInteger c1 = generator.modPow(_rm, prime);
+        BigInteger c2 = blindFactor.multiply(voterPublicKey.modPow(_rm, prime));
+        EncryptedBlindFactor out = new EncryptedBlindFactor(c1, c2);
 
         return out;
     }
-
-
 }

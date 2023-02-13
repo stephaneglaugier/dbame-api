@@ -13,15 +13,6 @@ public class Person {
     private Date dob;
     private Roll roll;
 
-    public boolean equals(Person p){
-        if (id != p.getId()) return false;
-        if (!firstName.equalsIgnoreCase(p.getFirstName())) return false;
-        if (!lastName.equalsIgnoreCase(p.getLastName())) return false;
-        if (!dob.equals(p.getDob())) return false;
-        if (!roll.equals(p.getRoll())) return false;
-        return true;
-    }
-
     public long getId() {
         return id;
     }

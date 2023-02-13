@@ -1,5 +1,7 @@
 package com.saugier.dbame.core.model.base;
 
+import java.math.BigInteger;
+
 /**
  * Class representing a d-BAME encrypted ballot.
  *
@@ -8,7 +10,7 @@ package com.saugier.dbame.core.model.base;
 public class EncryptedBallot {
 
     private String cypherText;
-    private Datum ephemeralKey;
+    private BigInteger ephemeralKey;
 
     public String getCypherText() {
         return cypherText;
@@ -18,11 +20,11 @@ public class EncryptedBallot {
         this.cypherText = cypherText;
     }
 
-    public Datum getEphemeralKey() {
+    public BigInteger getEphemeralKey() {
         return ephemeralKey;
     }
 
-    public void setEphemeralKey(Datum ephemeralKey) {
+    public void setEphemeralKey(BigInteger ephemeralKey) {
         this.ephemeralKey = ephemeralKey;
     }
 }

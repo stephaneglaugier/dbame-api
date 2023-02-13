@@ -47,7 +47,7 @@ public interface ICryptoService {
      * @return cypher and ephemeral key
      * @throws Exception
      */
-    EncryptedBallot encryptBallot(Ballot ballot, Datum maskedY, long permutation) throws Exception;
+    EncryptedBallot encryptBallot(Ballot ballot, BigInteger maskedY, long permutation) throws Exception;
 
     /**
      * Validates that a rollRE's El-Gamal Signature is valid
@@ -57,24 +57,24 @@ public interface ICryptoService {
     boolean validate(Roll roll);
 
     /**
-     * Signs a Datum using El-Gamal signature scheme.
-     * @param datum
+     * Signs a BigInteger using El-Gamal signature scheme.
+     * @param bigInteger
      * @return
      */
-    Signature sign (Datum datum);
+    Signature sign (BigInteger bigInteger);
 
     /**
-     * Masks a given datum, returning the blind factor used.
-     * @param datum
+     * Masks a given bigInteger, returning the blind factor used.
+     * @param bigInteger
      * @return
      */
-    Mask mask(Datum datum);
+    Mask mask(BigInteger bigInteger);
 
     /**
      * Encrypts a blind factor
      * @param blindFactor
      * @return
      */
-    EncryptedBlindFactor encrypt(Datum blindFactor, Datum voterPublicKey);
+    EncryptedBlindFactor encrypt(BigInteger blindFactor, BigInteger voterPublicKey);
 
 }

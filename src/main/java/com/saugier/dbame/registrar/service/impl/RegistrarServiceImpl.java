@@ -2,8 +2,8 @@ package com.saugier.dbame.registrar.service.impl;
 
 import com.google.gson.Gson;
 import com.saugier.dbame.core.model.base.Ballot;
-import com.saugier.dbame.core.model.base.Datum;
 import com.saugier.dbame.core.model.base.EncryptedBallot;
+import com.saugier.dbame.core.model.base.MaskedRequest;
 import com.saugier.dbame.core.model.base.Person;
 import com.saugier.dbame.core.model.web.BallotRelayRequest;
 import com.saugier.dbame.core.model.web.BallotRelayResponse;
@@ -141,15 +141,17 @@ public class RegistrarServiceImpl implements IRegistrarService {
     @Override
     public BallotRelayResponse handleRequestBallot(BallotRelayRequest ballotRelayRequest) throws Exception {
 
-        Optional<BallotRE> record = ballotDAO.findByPermutation(ballotRelayRequest.getPermutation());
+        MaskedRequest maskedRequest = baseObjectMapper.map(ballotRelayRequest);
 
+        Optional<BallotRE> record = ballotDAO.findByPermutation(maskedRequest.getPermutation());
         if (record.isPresent()){
-
             Ballot ballot = registrarObjectMapper.map(record.get());
-            EncryptedBallot encryptedBallot = cryptoService.encryptBallot(ballot, new Datum(ballotRelayRequest.getMask()), ballotRelayRequest.getPermutation());
-
+            EncryptedBallot encryptedBallot = cryptoService.encryptBallot(
+                    ballot,
+                    maskedRequest.getMaskedData(),
+                    maskedRequest.getPermutation()
+            );
             BallotRelayResponse out = baseObjectMapper.map(encryptedBallot);
-
             return out;
 
         } else {

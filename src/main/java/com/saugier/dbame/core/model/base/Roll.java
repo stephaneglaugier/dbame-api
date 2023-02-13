@@ -7,43 +7,19 @@ import java.math.BigInteger;
  */
 public class Roll {
 
-    private Datum publicKey;
+    private BigInteger publicKey;
     private Signature signature;
 
-    public Roll(){
-        this.publicKey = new Datum();
-        this.signature = new Signature();
-    }
-
-    public Roll(Datum publicKey, Signature signature){
-        this();
+    public Roll(BigInteger publicKey, Signature signature){
         this.setPublicKey(publicKey);
         this.setSignature(signature);
     }
 
-    public Roll(String publicKey, Signature signature){
-        this(new Datum(publicKey), signature);
-    }
-
-    public Roll(BigInteger publicKey, Signature signature){
-        this(new Datum(publicKey), signature);
-    }
-
-    public Roll(byte[] publicKey, Signature signature){
-        this(new Datum(publicKey), signature);
-    }
-
-    public boolean equals(Roll nr){
-        if (!publicKey.equals(nr.getPublicKey())) return false;
-        if (!signature.equals(nr.getSignature())) return false;
-        return true;
-    }
-
-    public Datum getPublicKey() {
+    public BigInteger getPublicKey() {
         return publicKey;
     }
 
-    public void setPublicKey(Datum publicKey) {
+    public void setPublicKey(BigInteger publicKey) {
         this.publicKey = publicKey;
     }
 

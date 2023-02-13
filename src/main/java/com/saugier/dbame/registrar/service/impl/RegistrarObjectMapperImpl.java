@@ -1,15 +1,22 @@
 package com.saugier.dbame.registrar.service.impl;
 
-import com.saugier.dbame.core.model.base.*;
+import com.saugier.dbame.core.model.base.Ballot;
+import com.saugier.dbame.core.model.base.Person;
+import com.saugier.dbame.core.model.base.Roll;
+import com.saugier.dbame.core.model.base.Signature;
 import com.saugier.dbame.registrar.model.entity.BallotRE;
 import com.saugier.dbame.registrar.model.entity.PersonRE;
 import com.saugier.dbame.registrar.model.entity.RollRE;
 import com.saugier.dbame.registrar.service.IRegistrarObjectMapper;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
+
 @Service
 public class RegistrarObjectMapperImpl implements IRegistrarObjectMapper {
 
+
+    private static final int DEFAULT_RADIX = 16;
 
     @Override
     public PersonRE map(Person in) {
@@ -44,23 +51,24 @@ public class RegistrarObjectMapperImpl implements IRegistrarObjectMapper {
 
         RollRE out = new RollRE();
 
-        out.setY(in.getPublicKey().toString());
+        out.setY(in.getPublicKey().toString(DEFAULT_RADIX));
         if (in.getSignature() != null) {
-            out.setW(in.getSignature().getW().toString());
-            out.setS(in.getSignature().getS().toString());
+            out.setW(in.getSignature().getW().toString(DEFAULT_RADIX));
+            out.setS(in.getSignature().getS().toString(DEFAULT_RADIX));
         }
-
         return out;
     }
 
     @Override
     public Roll map(RollRE in) {
 
-        Roll out = new Roll();
-
-        out.setPublicKey(new Datum(in.getY()));
-        out.setSignature(new Signature(in.getW(), in.getS()));
-
+        Roll out = new Roll(
+                new BigInteger(in.getY(), DEFAULT_RADIX),
+                new Signature(
+                        new BigInteger(in.getW(), DEFAULT_RADIX),
+                        new BigInteger(in.getS(), DEFAULT_RADIX)
+                )
+        );
         return out;
     }
 
@@ -72,8 +80,8 @@ public class RegistrarObjectMapperImpl implements IRegistrarObjectMapper {
         out.setId(in.getId());
         out.setTimestamp(in.getTimestamp());
         out.setRandint(in.getRandint());
-        out.setW(in.getSignature().getW().toString());
-        out.setS(in.getSignature().getS().toString());
+        out.setW(in.getSignature().getW().toString(DEFAULT_RADIX));
+        out.setS(in.getSignature().getS().toString(DEFAULT_RADIX));
         out.setPermutation(permutation);
 
         return out;
@@ -87,8 +95,12 @@ public class RegistrarObjectMapperImpl implements IRegistrarObjectMapper {
         out.setId(in.getId());
         out.setTimestamp(in.getTimestamp());
         out.setRandint(in.getRandint());
-        out.setSignature(new Signature(in.getW(), in.getS()));
-
+        out.setSignature(
+                new Signature(
+                        new BigInteger(in.getW(), DEFAULT_RADIX),
+                        new BigInteger(in.getS(), DEFAULT_RADIX)
+                )
+        );
         return out;
     }
 }

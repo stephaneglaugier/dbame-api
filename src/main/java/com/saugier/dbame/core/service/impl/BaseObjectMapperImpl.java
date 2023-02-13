@@ -1,15 +1,16 @@
 package com.saugier.dbame.core.service.impl;
 
 import com.saugier.dbame.core.model.base.*;
-import com.saugier.dbame.core.model.web.BallotRelayResponse;
-import com.saugier.dbame.core.model.web.BallotRequest;
-import com.saugier.dbame.core.model.web.RegistrationRequest;
-import com.saugier.dbame.core.model.web.RegistrationResponse;
+import com.saugier.dbame.core.model.web.*;
 import com.saugier.dbame.core.service.IBaseObjectMapper;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
+
 @Service
 public class BaseObjectMapperImpl implements IBaseObjectMapper {
+
+    private static final int DEFAULT_RADIX = 16;
 
     @Override
     public Person map(RegistrationRequest in) {
@@ -20,7 +21,7 @@ public class BaseObjectMapperImpl implements IBaseObjectMapper {
         out.setFirstName(in.getFirstName());
         out.setLastName(in.getLastName());
         out.setDob(in.getDob());
-        out.setRoll(new Roll(in.getPublicKey(), null));
+        out.setRoll(new Roll(new BigInteger(in.getPublicKey(), DEFAULT_RADIX), null));
 
         return out;
     }
@@ -33,8 +34,15 @@ public class BaseObjectMapperImpl implements IBaseObjectMapper {
         out.setFirstName(in.getFirstName());
         out.setLastName(in.getLastName());
         out.setDob(in.getDob());
-        out.setRoll(new Roll(in.getPublicKey(), new Signature(in.getW(), in.getS())));
-
+        out.setRoll(
+                new Roll(
+                        new BigInteger(in.getPublicKey(), DEFAULT_RADIX),
+                        new Signature(
+                                new BigInteger(in.getW(), DEFAULT_RADIX),
+                                new BigInteger(in.getS(), DEFAULT_RADIX)
+                        )
+                )
+        );
         return out;
     }
 
@@ -47,26 +55,35 @@ public class BaseObjectMapperImpl implements IBaseObjectMapper {
         out.setFirstName(in.getFirstName());
         out.setLastName(in.getLastName());
         out.setDob(in.getDob());
-        out.setPublicKey(in.getRoll().getPublicKey().toString());
-        out.setW(in.getRoll().getSignature().getW().toString());
-        out.setS(in.getRoll().getSignature().getS().toString());
+        out.setPublicKey(in.getRoll().getPublicKey().toString(DEFAULT_RADIX));
+        out.setW(in.getRoll().getSignature().getW().toString(DEFAULT_RADIX));
+        out.setS(in.getRoll().getSignature().getS().toString(DEFAULT_RADIX));
 
         return out;
     }
 
     @Override
     public String[] map(Signature in) {
-        return new String[]{in.getW().toString(), in.getS().toString()};
+        return new String[]{
+                in.getW().toString(DEFAULT_RADIX),
+                in.getS().toString(DEFAULT_RADIX)
+        };
     }
 
     @Override
     public Signature map(String[] in) {
-        return new Signature(in[0], in[1]);
+        return new Signature(
+                new BigInteger(in[0], DEFAULT_RADIX),
+                new BigInteger(in[1], DEFAULT_RADIX)
+        );
     }
 
     @Override
     public String[] map(EncryptedBlindFactor in) {
-        return new String[]{in.getC1().toString(), in.getC2().toString()};
+        return new String[]{
+                in.getC1().toString(DEFAULT_RADIX),
+                in.getC2().toString(DEFAULT_RADIX)
+        };
     }
 
     @Override
@@ -74,8 +91,19 @@ public class BaseObjectMapperImpl implements IBaseObjectMapper {
 
         BallotRelayResponse out = new BallotRelayResponse();
 
-        out.setEncryptedBallot(in.getCypherText().toString());
-        out.setEphemeralKey(in.getEphemeralKey().toString());
+        out.setEncryptedBallot(in.getCypherText());
+        out.setEphemeralKey(in.getEphemeralKey().toString(DEFAULT_RADIX));
+
+        return out;
+    }
+
+    @Override
+    public MaskedRequest map(BallotRelayRequest in) {
+
+        MaskedRequest out = new MaskedRequest(
+                new BigInteger(in.getMask(), DEFAULT_RADIX),
+                in.getPermutation()
+        );
 
         return out;
     }

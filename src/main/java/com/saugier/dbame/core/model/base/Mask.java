@@ -9,45 +9,27 @@ import java.math.BigInteger;
  */
 public class Mask {
 
-    private Datum mask;
-    private Datum blindFactor;
+    private BigInteger mask;
+    private BigInteger blindFactor;
 
-    public Mask(){
-        this.mask = new Datum();
-        this.blindFactor = new Datum();
-    }
-
-    public Mask(Datum mask, Datum permutation){
-        this();
+    public Mask(BigInteger mask, BigInteger blindFactor){
         this.setMask(mask);
         this.setBlindFactor(blindFactor);
     }
 
-    public Mask(String mask, String permutation){
-        this(new Datum(mask), new Datum(permutation));
-    }
-
-    public Mask(BigInteger mask, BigInteger permutation){
-        this(new Datum(mask), new Datum(permutation));
-    }
-
-    public Mask(byte[] mask, byte[] permutation){
-        this(new Datum(mask), new Datum(permutation));
-    }
-
-    public Datum getMask() {
+    public BigInteger getMask() {
         return mask;
     }
 
-    public void setMask(Datum mask) {
+    public void setMask(BigInteger mask) {
         this.mask = mask;
     }
 
-    public Datum getBlindFactor() {
+    public BigInteger getBlindFactor() {
         return blindFactor;
     }
 
-    public void setBlindFactor(Datum blindFactor) {
+    public void setBlindFactor(BigInteger blindFactor) {
         this.blindFactor = blindFactor;
     }
 }

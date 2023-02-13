@@ -33,6 +33,8 @@ import java.util.Optional;
 @Service
 public class ModeratorServiceImpl implements IModeratorService {
 
+    private static final int DEFAULT_RADIX = 16;
+
     @Autowired
     Logger log;
 
@@ -74,7 +76,7 @@ public class ModeratorServiceImpl implements IModeratorService {
 
             Mask mask = cryptoService.mask(person.getRoll().getPublicKey());
             BallotRelayRequest ballotRelayRequest = new BallotRelayRequest();
-            ballotRelayRequest.setMask(mask.getMask().toString());
+            ballotRelayRequest.setMask(mask.getMask().toString(DEFAULT_RADIX));
             ballotRelayRequest.setPermutation(permutationDAO.findById(id).get().getPermutation());
             String body = gson.toJson(ballotRelayRequest);
             log.warn(String.format("Sending masked ballot request to registrar: %s", body));
@@ -90,7 +92,7 @@ public class ModeratorServiceImpl implements IModeratorService {
             moderatorRelayME.setW(ballotRequest.getW());
             moderatorRelayME.setS(ballotRequest.getS());
             moderatorRelayME.setPermutation(ballotRelayRequest.getPermutation());
-            moderatorRelayME.setBlindFactor(mask.getBlindFactor().toString());
+            moderatorRelayME.setBlindFactor(mask.getBlindFactor().toString(DEFAULT_RADIX));
             moderatorRelayME.setCypherText(ballotRelayResponse.getEncryptedBallot());
             moderatorRelayME.setEphemeralKey(ballotRelayResponse.getEphemeralKey());
             encryptedBallotDAO.save(moderatorRelayME);
@@ -102,7 +104,7 @@ public class ModeratorServiceImpl implements IModeratorService {
             out.setEphemeralKey(ballotRelayResponse.getEphemeralKey());
             out.setEncryptedBlindFactor(baseObjectMapper.map(encryptedBlindFactor));
 
-            log.warn("bi: " + mask.getBlindFactor().toString());
+            log.warn("bi: " + mask.getBlindFactor().toString(DEFAULT_RADIX));
             return out;
         } else {
             throw new InvalidSignatureException("Roll signature was invalid.");

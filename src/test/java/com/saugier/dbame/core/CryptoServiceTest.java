@@ -1,6 +1,5 @@
 package com.saugier.dbame.core;
 
-import com.saugier.dbame.core.model.base.Datum;
 import com.saugier.dbame.core.model.base.Roll;
 import com.saugier.dbame.core.service.ICryptoService;
 import com.sun.org.slf4j.internal.Logger;
@@ -24,40 +23,41 @@ class CryptoServiceTest {
 
     @Test
     void isRelativelyPrimeTest() {
-        BigInteger a = new BigInteger("6");
-        BigInteger b = new BigInteger("35");
-        boolean result = a.gcd(b).equals(BigInteger.ONE);
+        java.math.BigInteger a = new java.math.BigInteger("6");
+        java.math.BigInteger b = new java.math.BigInteger("35");
+        boolean result = a.gcd(b).equals(java.math.BigInteger.ONE);
         assertTrue(result);
     }
 
     @Test
     void isNotRelativelyPrimeTest() {
-        BigInteger a = new BigInteger("6");
-        BigInteger b = new BigInteger("36");
-        boolean result = a.gcd(b).equals(BigInteger.ONE);
+        java.math.BigInteger a = new java.math.BigInteger("6");
+        java.math.BigInteger b = new java.math.BigInteger("36");
+        boolean result = a.gcd(b).equals(java.math.BigInteger.ONE);
         assertFalse(result);
     }
 
     @Test
     void randomlySelectTest() throws Exception {
-        BigInteger a = new BigInteger("100");
-        BigInteger b = cryptoService.randomlySelect(a);
-        assertTrue(a.compareTo(BigInteger.ZERO) == 1);
+        java.math.BigInteger a = new java.math.BigInteger("100");
+        java.math.BigInteger b = cryptoService.randomlySelect(a);
+        assertTrue(a.compareTo(java.math.BigInteger.ZERO) == 1);
         assertTrue(b.compareTo(a) == -1);
     }
 
     @Test
     void randomCoprimeTest() {
-        BigInteger a = new BigInteger("100");
-        BigInteger b = cryptoService.randomCoprime(a);
-        assertTrue(a.gcd(b).equals(BigInteger.ONE));
+        java.math.BigInteger a = new java.math.BigInteger("100");
+        java.math.BigInteger b = cryptoService.randomCoprime(a);
+        assertTrue(a.gcd(b).equals(java.math.BigInteger.ONE));
         assertTrue(b.compareTo(a) == -1);
     }
 
     @Test
     void verifySignedTest() throws Exception {
-        Roll roll = new Roll();
-        roll.setPublicKey(new Datum("1234"));
+        Roll roll = new Roll(
+                new BigInteger("2775", 16),
+                null);
         roll = cryptoService.sign(roll);
         assertTrue(cryptoService.validate(roll));
     }
