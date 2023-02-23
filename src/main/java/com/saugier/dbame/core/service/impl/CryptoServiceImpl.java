@@ -2,8 +2,9 @@ package com.saugier.dbame.core.service.impl;
 
 import com.saugier.dbame.core.model.base.*;
 import com.saugier.dbame.core.service.ICryptoService;
+import com.saugier.dbame.core.service.IElectionService;
 import com.sun.org.slf4j.internal.Logger;
-import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.DecoderException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
 import java.security.Key;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Random;
+import java.security.SecureRandom;
+import java.util.*;
 
 @Service
 public class CryptoServiceImpl implements ICryptoService {
@@ -24,48 +24,52 @@ public class CryptoServiceImpl implements ICryptoService {
     @Autowired
     Logger log;
 
-    public static int DEFAULT_RADIX = 16;
-    java.math.BigInteger TWO = new java.math.BigInteger("2");
+    @Autowired
+    IElectionService electionService;
 
-    private final java.math.BigInteger privateKey;
-    private final java.math.BigInteger prime;
-    private final java.math.BigInteger generator;
-    private final java.math.BigInteger registrarPublicKey;
-    private final java.math.BigInteger moderatorPublicKey;
+    public static int DEFAULT_RADIX = 16;
+
+    private final BigInteger privateKey;
+    private final BigInteger registrarPublicKey;
+    private final BigInteger moderatorPublicKey;
+
+    private final BigInteger prime;
+    private final BigInteger generator;
+    private final byte[] iv;
 
     public CryptoServiceImpl(
             @Value("${user.key.private}") String pk,
-            @Value("${global.key.p}") String p,
-            @Value("${global.key.g}") String g,
             @Value("${registrar.key.public}") String rpk,
-            @Value("${moderator.key.public}") String mpk
-    ){
-        privateKey = new java.math.BigInteger(pk, DEFAULT_RADIX);
-        prime = new java.math.BigInteger(p, DEFAULT_RADIX);
-        generator = new java.math.BigInteger(g, DEFAULT_RADIX);
-        registrarPublicKey = new java.math.BigInteger(rpk, DEFAULT_RADIX);
-        moderatorPublicKey = new java.math.BigInteger(mpk, DEFAULT_RADIX);
+            @Value("${moderator.key.public}") String mpk,
+            @Autowired IElectionService electionService
+    ) throws DecoderException {
+        privateKey = new BigInteger(pk, DEFAULT_RADIX);
+        registrarPublicKey = new BigInteger(rpk, DEFAULT_RADIX);
+        moderatorPublicKey = new BigInteger(mpk, DEFAULT_RADIX);
+        prime = electionService.getP();
+        generator = electionService.getG();
+        iv = electionService.getIv();
     }
 
     @Override
-    public java.math.BigInteger randomCoprime(java.math.BigInteger in){
-        java.math.BigInteger out = randomlySelect(in);
+    public BigInteger randomCoprime(BigInteger in){
+        BigInteger out = randomlySelect(in);
         while (!isRelativelyPrime(in, out)){
             out = randomlySelect(in);
         }
         return out;
     }
 
-    private boolean isRelativelyPrime(java.math.BigInteger a, java.math.BigInteger b){
-        return a.gcd(b).equals(java.math.BigInteger.ONE);
+    private boolean isRelativelyPrime(BigInteger a, BigInteger b){
+        return a.gcd(b).equals(BigInteger.ONE);
     }
 
     @Override
-    public java.math.BigInteger randomlySelect(java.math.BigInteger upperBound){
+    public BigInteger randomlySelect(BigInteger upperBound){
         Random rand = new Random();
-        java.math.BigInteger out = new java.math.BigInteger(upperBound.bitLength(), rand);
+        BigInteger out = new BigInteger(upperBound.bitLength(), rand);
         while( out.compareTo(upperBound) > 0 ) {
-            out = new java.math.BigInteger(upperBound.bitLength(), rand);
+            out = new BigInteger(upperBound.bitLength(), rand);
         }
         return out;
     }
@@ -93,11 +97,11 @@ public class CryptoServiceImpl implements ICryptoService {
 
     public Signature sign(byte[] bytes) {
 
-        java.math.BigInteger _pMinus1 = prime.subtract(java.math.BigInteger.ONE);
-        java.math.BigInteger _u = randomCoprime(_pMinus1);
-        java.math.BigInteger _w = generator.modPow(_u, prime);
-        java.math.BigInteger _hashedMessage = new java.math.BigInteger(Hash.sha256(bytes));
-        java.math.BigInteger _s =
+        BigInteger _pMinus1 = prime.subtract(BigInteger.ONE);
+        BigInteger _u = randomCoprime(_pMinus1);
+        BigInteger _w = generator.modPow(_u, prime);
+        BigInteger _hashedMessage = new BigInteger(Hash.sha256(bytes));
+        BigInteger _s =
                 (_hashedMessage.subtract(privateKey.multiply(_w)))
                         .multiply(_u.modInverse(_pMinus1))
                         .mod(_pMinus1);
@@ -109,22 +113,22 @@ public class CryptoServiceImpl implements ICryptoService {
 
     @Override
     public boolean validate(Roll roll) {
-        java.math.BigInteger _w = roll.getSignature().getW();
-        java.math.BigInteger _s = roll.getSignature().getS();
+        BigInteger _w = roll.getSignature().getW();
+        BigInteger _s = roll.getSignature().getS();
 
         if (_w.compareTo(prime) > -1){
             log.warn("INVALID ROLL: w greater than p");
             return false;
         }
-        if (_s.compareTo(prime.subtract(java.math.BigInteger.ONE)) > -1){
+        if (_s.compareTo(prime.subtract(BigInteger.ONE)) > -1){
             log.warn("INVALID ROLL: s greater than p-1");
             return false;
         }
 
-        java.math.BigInteger _hashedMessage = new java.math.BigInteger(Hash.sha256(roll.getPublicKey().toByteArray()));
+        BigInteger _hashedMessage = new BigInteger(Hash.sha256(roll.getPublicKey().toByteArray()));
 
-        java.math.BigInteger _a = generator.modPow(_hashedMessage, prime);
-        java.math.BigInteger _b = registrarPublicKey.modPow(_w, prime).multiply(_w.modPow(_s, prime)).mod(prime);
+        BigInteger _a = generator.modPow(_hashedMessage, prime);
+        BigInteger _b = registrarPublicKey.modPow(_w, prime).multiply(_w.modPow(_s, prime)).mod(prime);
 
         if (_a.mod(prime).compareTo(_b.mod(prime)) != 0){
             log.warn(String.format("INVALID ROLL: %s != %s", _a.toString(DEFAULT_RADIX), _b.toString(DEFAULT_RADIX)));
@@ -179,13 +183,11 @@ public class CryptoServiceImpl implements ICryptoService {
         log.warn("message = " + message);
         log.warn("password = " + password.toString(DEFAULT_RADIX));
 
-        byte[] fLBAKey = java.util.Arrays.copyOf(password.toByteArray() , 32);
+        byte[] fLBAKey = java.util.Arrays.copyOf(password.toByteArray() , 32); // TODO replace with key size
         log.warn("fLBAKey = " + Arrays.toString(fLBAKey));
 
         Key secretKey = new SecretKeySpec(fLBAKey, "AES");
         log.warn("secretKey = " + Arrays.toString(secretKey.getEncoded()));
-
-        byte[] iv = Hex.decodeHex("F27D5C9927726BCEFE7510B1BDD3D137");
 
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
@@ -225,7 +227,7 @@ public class CryptoServiceImpl implements ICryptoService {
     @Override
     public EncryptedBlindFactor encrypt(BigInteger blindFactor, BigInteger voterPublicKey) {
 
-        java.math.BigInteger _rm = randomlySelect(prime);
+        BigInteger _rm = randomlySelect(prime);
 
         BigInteger c1 = generator.modPow(_rm, prime);
         BigInteger c2 = blindFactor.multiply(voterPublicKey.modPow(_rm, prime));
@@ -233,4 +235,55 @@ public class CryptoServiceImpl implements ICryptoService {
 
         return out;
     }
+
+    @Override
+    public Map.Entry<BigInteger, BigInteger> generatePrimeAndGenerator(int bitLength) {
+        SecureRandom random = new SecureRandom();
+        BigInteger p, g;
+
+        // Generate a prime number of specified bit length
+        do {
+            p = BigInteger.probablePrime(bitLength, random);
+        } while (!p.isProbablePrime(100)); // Ensure prime with high probability
+
+        // Find a generator for the group modulo p
+        g = findGenerator(p, random);
+
+        // Return prime number and generator as a Map.Entry
+        Map.Entry<BigInteger, BigInteger> result = new HashMap.SimpleEntry<>(p, g);
+        return result;
+    }
+
+    // Helper method to find a generator for a prime number p
+    public static BigInteger findGenerator(BigInteger p, SecureRandom random) {
+        BigInteger phi = p.subtract(BigInteger.ONE); // phi(p) = p - 1
+        BigInteger TWO = new BigInteger("2");
+        BigInteger g;
+
+        do {
+            // Generate a random integer g between 2 and p-1
+            g = new BigInteger(phi.bitLength(), random).mod(phi).add(TWO);
+        } while (!(g.modPow(phi.divide(TWO), p).equals(BigInteger.ONE))
+                || !(g.modPow(phi.divide(BigInteger.valueOf(3)), p).equals(BigInteger.ONE)));
+
+        return g;
+    }
+
+    @Override
+    public BigInteger generatePrivateKey(BigInteger p, int bitLength) {
+        if (bitLength >= p.bitLength()) {
+            throw new IllegalArgumentException("bitLength must be less than p's bit length");
+        }
+
+        SecureRandom random = new SecureRandom();
+        BigInteger privateKey;
+
+        do {
+            // Generate a random integer with the desired bit length
+            privateKey = new BigInteger(bitLength, random);
+        } while (privateKey.compareTo(BigInteger.ZERO) <= 0 || privateKey.compareTo(p) >= 0);
+
+        return privateKey;
+    }
 }
+

@@ -5,12 +5,10 @@ import com.saugier.dbame.core.model.base.Ballot;
 import com.saugier.dbame.core.model.base.EncryptedBallot;
 import com.saugier.dbame.core.model.base.MaskedRequest;
 import com.saugier.dbame.core.model.base.Person;
-import com.saugier.dbame.core.model.web.BallotRelayRequest;
-import com.saugier.dbame.core.model.web.BallotRelayResponse;
-import com.saugier.dbame.core.model.web.RegistrationRequest;
-import com.saugier.dbame.core.model.web.RegistrationResponse;
+import com.saugier.dbame.core.model.web.*;
 import com.saugier.dbame.core.service.IBaseObjectMapper;
 import com.saugier.dbame.core.service.ICryptoService;
+import com.saugier.dbame.core.service.IElectionService;
 import com.saugier.dbame.registrar.exception.AlreadyRegisteredException;
 import com.saugier.dbame.registrar.exception.IdNotFoundException;
 import com.saugier.dbame.registrar.exception.IncorrectDetailsException;
@@ -35,6 +33,9 @@ public class RegistrarServiceImpl implements IRegistrarService {
 
     @Autowired
     private Logger log;
+
+    @Autowired
+    private IElectionService electionService;
 
     @Autowired
     private IRollDAO rollDAO;
@@ -157,5 +158,10 @@ public class RegistrarServiceImpl implements IRegistrarService {
         } else {
             throw new NoSuchElementException("Ballot does not exist");
         }
+    }
+
+    @Override
+    public ElectionParams handleElectionParams() throws Exception {
+        return electionService.asElectionParams();
     }
 }

@@ -12,7 +12,7 @@ public class Ballot {
 
     private long id;
     private Date timestamp;
-    private int randint;
+    private int randint; //TODO store in DB as hex string
     private Signature signature;
 
     /**

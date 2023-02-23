@@ -1,10 +1,7 @@
 package com.saugier.dbame.registrar.controller;
 
 import com.google.gson.Gson;
-import com.saugier.dbame.core.model.web.BallotRelayRequest;
-import com.saugier.dbame.core.model.web.BallotRelayResponse;
-import com.saugier.dbame.core.model.web.RegistrationRequest;
-import com.saugier.dbame.core.model.web.RegistrationResponse;
+import com.saugier.dbame.core.model.web.*;
 import com.saugier.dbame.core.service.ISchemaService;
 import com.saugier.dbame.registrar.service.IRegistrarService;
 import com.sun.org.slf4j.internal.Logger;
@@ -37,6 +34,16 @@ public class RegistrarController {
 
     @Value("${schemas.registrar.requestBallot}")
     private String requestBallotSchema;
+
+    @RequestMapping(
+            value = "/electionParams",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<String> electionParams(HttpEntity<String> httpEntity) throws Exception {
+        log.warn("Received request for election parameters");
+        ElectionParams out = registrarService.handleElectionParams();
+        return new ResponseEntity<>(gson.toJson(out), HttpStatus.OK);
+    }
 
     @RequestMapping(
             value = "/registerToVote",
