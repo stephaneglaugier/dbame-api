@@ -5,7 +5,7 @@ import com.saugier.dbame.core.model.web.BallotRequest;
 import com.saugier.dbame.core.model.web.BallotResponse;
 import com.saugier.dbame.core.service.ISchemaService;
 import com.saugier.dbame.moderator.service.IModeratorService;
-import com.sun.org.slf4j.internal.Logger;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;

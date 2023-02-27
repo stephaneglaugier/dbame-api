@@ -24,7 +24,7 @@ public class PersonRE {
     @JoinColumn(name="roll_id")
     private RollRE rollRE;
 
-    @Override
+    
     public boolean equals(Object o){
         if (o == this) return true;
         if (!(o instanceof PersonRE)) return false;

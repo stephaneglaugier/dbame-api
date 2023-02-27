@@ -2,7 +2,7 @@ package com.saugier.dbame.core;
 
 import com.saugier.dbame.core.model.base.Roll;
 import com.saugier.dbame.core.service.ICryptoService;
-import com.sun.org.slf4j.internal.Logger;
+import org.slf4j.Logger;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

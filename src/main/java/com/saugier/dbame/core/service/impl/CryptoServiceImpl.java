@@ -3,7 +3,7 @@ package com.saugier.dbame.core.service.impl;
 import com.saugier.dbame.core.model.base.*;
 import com.saugier.dbame.core.service.ICryptoService;
 import com.saugier.dbame.core.service.IElectionService;
-import com.sun.org.slf4j.internal.Logger;
+import org.slf4j.Logger;
 import org.apache.commons.codec.DecoderException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,7 +51,7 @@ public class CryptoServiceImpl implements ICryptoService {
         iv = electionService.getIv();
     }
 
-    @Override
+    
     public BigInteger randomCoprime(BigInteger in){
         BigInteger out = randomlySelect(in);
         while (!isRelativelyPrime(in, out)){
@@ -64,7 +64,7 @@ public class CryptoServiceImpl implements ICryptoService {
         return a.gcd(b).equals(BigInteger.ONE);
     }
 
-    @Override
+    
     public BigInteger randomlySelect(BigInteger upperBound){
         Random rand = new Random();
         BigInteger out = new BigInteger(upperBound.bitLength(), rand);
@@ -75,13 +75,13 @@ public class CryptoServiceImpl implements ICryptoService {
     }
 
 
-    @Override
+    
     public Ballot sign(Ballot ballot) throws Exception {
         ballot.setSignature(sign(ballot.asMessage()));
         return ballot;
     }
 
-    @Override
+    
     public Roll sign(Roll roll) {
         roll.setSignature(sign(roll.getPublicKey()));
         return roll;
@@ -111,7 +111,7 @@ public class CryptoServiceImpl implements ICryptoService {
         return out;
     }
 
-    @Override
+    
     public boolean validate(Roll roll) {
         BigInteger _w = roll.getSignature().getW();
         BigInteger _s = roll.getSignature().getS();
@@ -146,7 +146,7 @@ public class CryptoServiceImpl implements ICryptoService {
         return out;
     }
 
-    @Override
+    
     public EncryptedBallot encryptBallot(Ballot ballot, BigInteger maskedY, long permutation) throws Exception{
         BigInteger _q = randomlySelect(prime);
         BigInteger _k = maskedY.modPow(_q, prime);
@@ -213,7 +213,7 @@ public class CryptoServiceImpl implements ICryptoService {
         return encoded;
     }
 
-    @Override
+    
     public Mask mask(BigInteger bigInteger) {
 
         BigInteger blindFactor = randomlySelect(prime);
@@ -224,7 +224,7 @@ public class CryptoServiceImpl implements ICryptoService {
         return out;
     }
 
-    @Override
+    
     public EncryptedBlindFactor encrypt(BigInteger blindFactor, BigInteger voterPublicKey) {
 
         BigInteger _rm = randomlySelect(prime);
@@ -236,7 +236,7 @@ public class CryptoServiceImpl implements ICryptoService {
         return out;
     }
 
-    @Override
+    
     public Map.Entry<BigInteger, BigInteger> generatePrimeAndGenerator(int bitLength) {
         SecureRandom random = new SecureRandom();
         BigInteger p, g;
@@ -269,7 +269,7 @@ public class CryptoServiceImpl implements ICryptoService {
         return g;
     }
 
-    @Override
+    
     public BigInteger generatePrivateKey(BigInteger p, int bitLength) {
         if (bitLength >= p.bitLength()) {
             throw new IllegalArgumentException("bitLength must be less than p's bit length");

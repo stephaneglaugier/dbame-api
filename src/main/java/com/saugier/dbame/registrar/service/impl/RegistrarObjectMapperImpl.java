@@ -18,7 +18,7 @@ public class RegistrarObjectMapperImpl implements IRegistrarObjectMapper {
 
     private static final int DEFAULT_RADIX = 16;
 
-    @Override
+    
     public PersonRE map(Person in) {
 
         PersonRE out = new PersonRE();
@@ -32,7 +32,7 @@ public class RegistrarObjectMapperImpl implements IRegistrarObjectMapper {
         return out;
     }
 
-    @Override
+    
     public Person map(PersonRE in) {
 
         Person out = new Person();
@@ -46,7 +46,7 @@ public class RegistrarObjectMapperImpl implements IRegistrarObjectMapper {
         return out;
     }
 
-    @Override
+    
     public RollRE map(Roll in) {
 
         RollRE out = new RollRE();
@@ -59,7 +59,7 @@ public class RegistrarObjectMapperImpl implements IRegistrarObjectMapper {
         return out;
     }
 
-    @Override
+    
     public Roll map(RollRE in) {
 
         Roll out = new Roll(
@@ -72,7 +72,7 @@ public class RegistrarObjectMapperImpl implements IRegistrarObjectMapper {
         return out;
     }
 
-    @Override
+    
     public BallotRE map(Ballot in, long permutation) {
 
         BallotRE out = new BallotRE();
@@ -87,7 +87,7 @@ public class RegistrarObjectMapperImpl implements IRegistrarObjectMapper {
         return out;
     }
 
-    @Override
+    
     public Ballot map(BallotRE in) {
 
         Ballot out = new Ballot();

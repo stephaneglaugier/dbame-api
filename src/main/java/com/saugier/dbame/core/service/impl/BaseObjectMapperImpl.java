@@ -12,7 +12,7 @@ public class BaseObjectMapperImpl implements IBaseObjectMapper {
 
     private static final int DEFAULT_RADIX = 16;
 
-    @Override
+    
     public Person map(RegistrationRequest in) {
 
         Person out = new Person();
@@ -26,7 +26,7 @@ public class BaseObjectMapperImpl implements IBaseObjectMapper {
         return out;
     }
 
-    @Override
+    
     public Person map(BallotRequest in) {
         Person out = new Person();
 
@@ -46,7 +46,7 @@ public class BaseObjectMapperImpl implements IBaseObjectMapper {
         return out;
     }
 
-    @Override
+    
     public RegistrationResponse map(Person in) {
 
         RegistrationResponse out = new RegistrationResponse();
@@ -62,7 +62,7 @@ public class BaseObjectMapperImpl implements IBaseObjectMapper {
         return out;
     }
 
-    @Override
+    
     public String[] map(Signature in) {
         return new String[]{
                 in.getW().toString(DEFAULT_RADIX),
@@ -70,7 +70,7 @@ public class BaseObjectMapperImpl implements IBaseObjectMapper {
         };
     }
 
-    @Override
+    
     public Signature map(String[] in) {
         return new Signature(
                 new BigInteger(in[0], DEFAULT_RADIX),
@@ -78,7 +78,7 @@ public class BaseObjectMapperImpl implements IBaseObjectMapper {
         );
     }
 
-    @Override
+    
     public String[] map(EncryptedBlindFactor in) {
         return new String[]{
                 in.getC1().toString(DEFAULT_RADIX),
@@ -86,7 +86,7 @@ public class BaseObjectMapperImpl implements IBaseObjectMapper {
         };
     }
 
-    @Override
+    
     public BallotRelayResponse map(EncryptedBallot in) {
 
         BallotRelayResponse out = new BallotRelayResponse();
@@ -97,7 +97,7 @@ public class BaseObjectMapperImpl implements IBaseObjectMapper {
         return out;
     }
 
-    @Override
+    
     public MaskedRequest map(BallotRelayRequest in) {
 
         MaskedRequest out = new MaskedRequest(

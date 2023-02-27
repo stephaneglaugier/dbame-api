@@ -13,7 +13,7 @@ public class ModeratorObjectMapperImpl implements IModeratorObjectMapper {
 
     private static final int DEFAULT_RADIX = 16;
 
-    @Override
+    
     public RollRE map(Roll in) {
         RollRE out = new RollRE();
         out.setY(in.getPublicKey().toString(DEFAULT_RADIX));
@@ -22,7 +22,7 @@ public class ModeratorObjectMapperImpl implements IModeratorObjectMapper {
         return out;
     }
 
-    @Override
+    
     public Roll map(RollRE in) {
 
         Roll out = new Roll(
@@ -35,7 +35,7 @@ public class ModeratorObjectMapperImpl implements IModeratorObjectMapper {
         return out;
     }
 
-    @Override
+    
     public ModeratorRelayME map(EncryptedBallot ec, MaskedRequest mr, Roll roll, Mask mask) {
 
         ModeratorRelayME out = new ModeratorRelayME();

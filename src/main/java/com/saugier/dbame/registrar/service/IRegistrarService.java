@@ -8,8 +8,12 @@ import org.springframework.stereotype.Service;
 public interface IRegistrarService {
 
     RegistrationResponse handleRegisterToVote(RegistrationRequest body) throws Exception;
+
     String handleGenerateBallots() throws Exception;
+
     BallotRelayResponse handleRequestBallot(BallotRelayRequest ballotRelayRequest) throws Exception;
 
     ElectionParams handleElectionParams() throws DecoderException, Exception;
+
+    long handleGetNRolls() throws Exception;
 }

@@ -30,32 +30,32 @@ public class ElectionServiceImpl implements IElectionService {
     @Value("#{'${global.candidates}'.split(',')}")
     private List<String> candidates;
 
-    @Override
+    
     public String getDbameVersion() {
         return dbameVersion;
     }
 
-    @Override
+    
     public BigInteger getP() {
         return new BigInteger(p, DEFAULT_RADIX);
     }
 
-    @Override
+    
     public BigInteger getG() {
         return new BigInteger(g, DEFAULT_RADIX);
     }
 
-    @Override
+    
     public byte[] getIv() throws DecoderException {
         return Hex.decodeHex(iv);
     }
 
-    @Override
+    
     public List<String> getCandidates() {
         return candidates;
     }
 
-    @Override
+    
     public ElectionParams asElectionParams() throws DecoderException {
         return new ElectionParams(
                 getDbameVersion(),

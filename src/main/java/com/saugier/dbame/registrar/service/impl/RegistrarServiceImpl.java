@@ -19,7 +19,7 @@ import com.saugier.dbame.registrar.repository.IRollDAO;
 import com.saugier.dbame.registrar.repository.ISignedBallotDAO;
 import com.saugier.dbame.registrar.service.IRegistrarObjectMapper;
 import com.saugier.dbame.registrar.service.IRegistrarService;
-import com.sun.org.slf4j.internal.Logger;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -58,7 +58,7 @@ public class RegistrarServiceImpl implements IRegistrarService {
     @Autowired
     private IBaseObjectMapper baseObjectMapper;
 
-    @Override
+    
     public RegistrationResponse handleRegisterToVote(RegistrationRequest registrationRequest) throws Exception {
 
         Person person = baseObjectMapper.map(registrationRequest);
@@ -96,7 +96,7 @@ public class RegistrarServiceImpl implements IRegistrarService {
         return baseObjectMapper.map(person);
     }
 
-    @Override
+    
     public String handleGenerateBallots() throws Exception {
         if (ballotDAO.count() > 0) {
             return "Ballots have already been generated";
@@ -139,7 +139,7 @@ public class RegistrarServiceImpl implements IRegistrarService {
         return out;
     }
 
-    @Override
+    
     public BallotRelayResponse handleRequestBallot(BallotRelayRequest ballotRelayRequest) throws Exception {
 
         MaskedRequest maskedRequest = baseObjectMapper.map(ballotRelayRequest);
@@ -160,8 +160,13 @@ public class RegistrarServiceImpl implements IRegistrarService {
         }
     }
 
-    @Override
+    
     public ElectionParams handleElectionParams() throws Exception {
         return electionService.asElectionParams();
+    }
+
+    @Override
+    public long handleGetNRolls() throws Exception {
+        return rollDAO.count();
     }
 }

@@ -19,7 +19,7 @@ import com.saugier.dbame.moderator.service.IModeratorObjectMapper;
 import com.saugier.dbame.moderator.service.IModeratorService;
 import com.saugier.dbame.registrar.model.entity.RollRE;
 import com.saugier.dbame.registrar.repository.IRollDAO;
-import com.sun.org.slf4j.internal.Logger;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -59,7 +59,7 @@ public class ModeratorServiceImpl implements IModeratorService {
     @Autowired
     IBaseObjectMapper baseObjectMapper;
 
-    @Override
+    
     public BallotResponse handleRequestBallot(BallotRequest ballotRequest) throws Exception {
 
         Person person = baseObjectMapper.map(ballotRequest);
@@ -111,9 +111,11 @@ public class ModeratorServiceImpl implements IModeratorService {
         }
     }
 
-    @Override
+    
     public String handleGeneratePermutation() throws Exception {
-        long n = rollDAO.count();
+        ResponseEntity<Long> response =
+                new RestTemplate().getForEntity("http://localhost:8080/registrar/getNRolls", Long.class);
+        long n = response.getBody();
         PermutationME permutationME;
         List<PermutationME> out = new ArrayList<>();
         for (Long i = new Long(1);i<=n;i++){
@@ -122,6 +124,7 @@ public class ModeratorServiceImpl implements IModeratorService {
             out.add(permutationME);
         }
         Collections.shuffle(out);
+        permutationDAO.deleteAll();
         permutationDAO.saveAll(out);
         return "Permutation generated successfully";
     }

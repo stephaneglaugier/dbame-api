@@ -21,7 +21,7 @@ public class RollRE implements Serializable {
     @Column(name = "s")
     private String s;
 
-    @Override
+    
     public boolean equals(Object o){
         if (o == this) return true;
         if (!(o instanceof RollRE)) return false;

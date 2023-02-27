@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.saugier.dbame.core.model.web.*;
 import com.saugier.dbame.core.service.ISchemaService;
 import com.saugier.dbame.registrar.service.IRegistrarService;
-import com.sun.org.slf4j.internal.Logger;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -81,5 +81,15 @@ public class RegistrarController {
         BallotRelayRequest ballotRelayRequest = gson.fromJson(json, BallotRelayRequest.class);
         BallotRelayResponse out = registrarService.handleRequestBallot(ballotRelayRequest);
         return new ResponseEntity<>(gson.toJson(out), HttpStatus.OK);
+    }
+
+    @RequestMapping(
+            value = "getNRolls",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<String> getNRolls(HttpEntity<String> httpEntity) throws Exception {
+        log.warn("Received request for ballot");
+        long n = registrarService.handleGetNRolls();
+        return new ResponseEntity<>(gson.toJson(n), HttpStatus.OK);
     }
 }
