@@ -5,7 +5,7 @@ import com.saugier.dbame.core.model.base.Roll;
 import com.saugier.dbame.core.model.base.EncryptedBallot;
 import com.saugier.dbame.core.model.base.MaskedRequest;
 import com.saugier.dbame.moderator.model.entity.ModeratorRelayME;
-import com.saugier.dbame.registrar.model.entity.RollRE;
+import com.saugier.dbame.core.model.entity.RollRE;
 import org.springframework.stereotype.Service;
 
 @Service

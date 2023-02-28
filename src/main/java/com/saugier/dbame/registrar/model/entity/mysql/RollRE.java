@@ -1,4 +1,4 @@
-package com.saugier.dbame.registrar.model.entity;
+package com.saugier.dbame.core.model.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -7,6 +7,8 @@ import java.util.Map;
 
 @Entity
 public class RollRE implements Serializable {
+
+    public RollRE(){};
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

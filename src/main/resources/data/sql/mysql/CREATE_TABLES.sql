@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS voters;
 DROP TABLE IF EXISTS roll;
 
 CREATE TABLE roll (
-  id INT NOT NULL AUTO_INCREMENT,
+  id INT NOT NULL auto_increment,
   y VARCHAR(512) NOT NULL,
   w VARCHAR(512) NOT NULL,
   s VARCHAR(512) NOT NULL,
@@ -13,7 +13,6 @@ CREATE TABLE voters (
   id INT NOT NULL AUTO_INCREMENT,
   first_name VARCHAR(50) NOT NULL,
   last_name VARCHAR(50) NOT NULL,
-  id_number VARCHAR(20) NOT NULL,
   date_of_birth DATE NOT NULL,
   roll_id INT,
   PRIMARY KEY (id),
