@@ -1,10 +1,10 @@
-package com.saugier.dbame.moderator.controller;
+package com.saugier.dbame.registrar.controller;
 
 import com.google.gson.Gson;
 import com.saugier.dbame.core.model.web.BallotRequest;
 import com.saugier.dbame.core.model.web.BallotResponse;
 import com.saugier.dbame.core.service.ISchemaService;
-import com.saugier.dbame.moderator.service.IModeratorService;
+import com.saugier.dbame.registrar.service.IModeratorService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,6 +1,6 @@
-package com.saugier.dbame.registrar.repository;
+package com.saugier.dbame.registrar.repository.h2;
 
-import com.saugier.dbame.moderator.model.entity.ModeratorRelayME;
+import com.saugier.dbame.registrar.model.entity.h2.ModeratorRelayME;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

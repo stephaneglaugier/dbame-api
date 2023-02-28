@@ -1,4 +1,4 @@
-package com.saugier.dbame.registrar.model.entity;
+package com.saugier.dbame.registrar.model.entity.mysql;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -16,7 +16,7 @@ public class PersonRE {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "dob")
+    @Column(name = "date_of_birth")
     @Temporal(TemporalType.DATE)
     private Date dob;
 

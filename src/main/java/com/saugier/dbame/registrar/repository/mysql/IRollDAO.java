@@ -1,4 +1,4 @@
-package com.saugier.dbame.registrar.repository.mysql.repository;
+package com.saugier.dbame.registrar.repository.mysql;
 
 import com.saugier.dbame.registrar.model.entity.mysql.RollRE;
 import org.springframework.data.repository.CrudRepository;

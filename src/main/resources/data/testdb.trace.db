@@ -1,0 +1,74 @@
+2023-02-28 13:02:17 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "BALLOTS" not found (this database is empty); SQL statement:
+select count(*) as col_0_0_ from ballots ballotre0_ [42104-214]
+2023-02-28 13:02:36 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "BALLOTS" not found (this database is empty); SQL statement:
+select count(*) as col_0_0_ from ballots ballotre0_ [42104-214]
+2023-02-28 13:04:26 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "BALLOTS" not found (this database is empty); SQL statement:
+select count(*) as col_0_0_ from ballots ballotre0_ [42104-214]
+2023-02-28 15:46:53 jdbc[23]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "delete [*]table if exists ballots"; expected "identifier"; SQL statement:
+delete table if exists ballots [42001-214]
+2023-02-28 15:46:53 jdbc[23]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "delete [*]table if exists moderator_relay"; expected "identifier"; SQL statement:
+delete table if exists moderator_relay [42001-214]
+2023-02-28 15:46:53 jdbc[23]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "delete [*]table if exists permutation_moderator"; expected "identifier"; SQL statement:
+delete table if exists permutation_moderator [42001-214]
+2023-02-28 15:46:53 jdbc[23]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "BALLOTS" already exists; SQL statement:
+CREATE TABLE ballots (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    timestamp TIMESTAMP NOT NULL,
+    randint INT NOT NULL,
+    w VARCHAR(255) NOT NULL,
+    s VARCHAR(255) NOT NULL,
+    permutation BIGINT NOT NULL
+) [42101-214]
+2023-02-28 15:46:53 jdbc[23]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "PERMUTATION_MODERATOR" already exists; SQL statement:
+CREATE TABLE permutation_moderator (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    a BIGINT NOT NULL,
+    b BIGINT NOT NULL
+) [42101-214]
+2023-02-28 15:47:16 jdbc[23]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "delete [*]table if exists ballots"; expected "identifier"; SQL statement:
+delete table if exists ballots [42001-214]
+2023-02-28 15:47:16 jdbc[23]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "delete [*]table if exists moderator_relay"; expected "identifier"; SQL statement:
+delete table if exists moderator_relay [42001-214]
+2023-02-28 15:47:16 jdbc[23]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "delete [*]table if exists permutation_moderator"; expected "identifier"; SQL statement:
+delete table if exists permutation_moderator [42001-214]
+2023-02-28 15:47:16 jdbc[23]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "BALLOTS" already exists; SQL statement:
+CREATE TABLE ballots (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    timestamp TIMESTAMP NOT NULL,
+    randint INT NOT NULL,
+    w VARCHAR(255) NOT NULL,
+    s VARCHAR(255) NOT NULL,
+    permutation BIGINT NOT NULL
+) [42101-214]
+2023-02-28 15:47:16 jdbc[23]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "MODERATOR_RELAY" already exists; SQL statement:
+CREATE TABLE moderator_relay (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    y VARCHAR(255) NOT NULL,
+    maskedY VARCHAR(255) NOT NULL,
+    w VARCHAR(255) NOT NULL,
+    s VARCHAR(255) NOT NULL,
+    permutation BIGINT NOT NULL,
+    blindFactor VARCHAR(255) NOT NULL,
+    cypherText VARCHAR(255) NOT NULL,
+    ephemeralKey VARCHAR(255) NOT NULL
+) [42101-214]
+2023-02-28 15:47:16 jdbc[23]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "PERMUTATION_MODERATOR" already exists; SQL statement:
+CREATE TABLE permutation_moderator (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    a BIGINT NOT NULL,
+    b BIGINT NOT NULL
+) [42101-214]

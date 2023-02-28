@@ -1,4 +1,4 @@
-package com.saugier.dbame.moderator.service.impl;
+package com.saugier.dbame.registrar.service.impl;
 
 import com.google.gson.Gson;
 import com.saugier.dbame.core.exception.InvalidSignatureException;
@@ -11,14 +11,14 @@ import com.saugier.dbame.core.model.web.BallotRequest;
 import com.saugier.dbame.core.model.web.BallotResponse;
 import com.saugier.dbame.core.service.IBaseObjectMapper;
 import com.saugier.dbame.core.service.ICryptoService;
-import com.saugier.dbame.moderator.model.entity.ModeratorRelayME;
-import com.saugier.dbame.moderator.model.entity.PermutationME;
-import com.saugier.dbame.registrar.repository.IEncryptedBallotDAO;
-import com.saugier.dbame.registrar.repository.IPermutationDAO;
-import com.saugier.dbame.moderator.service.IModeratorObjectMapper;
-import com.saugier.dbame.moderator.service.IModeratorService;
-import com.saugier.dbame.core.model.entity.RollRE;
-import com.saugier.dbame.core.repository.IRollDAO;
+import com.saugier.dbame.registrar.model.entity.h2.ModeratorRelayME;
+import com.saugier.dbame.registrar.model.entity.h2.PermutationME;
+import com.saugier.dbame.registrar.repository.h2.IEncryptedBallotDAO;
+import com.saugier.dbame.registrar.repository.h2.IPermutationDAO;
+import com.saugier.dbame.registrar.service.IModeratorObjectMapper;
+import com.saugier.dbame.registrar.service.IModeratorService;
+import com.saugier.dbame.registrar.model.entity.mysql.RollRE;
+import com.saugier.dbame.registrar.repository.mysql.IRollDAO;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -77,7 +77,7 @@ public class ModeratorServiceImpl implements IModeratorService {
             Mask mask = cryptoService.mask(person.getRoll().getPublicKey());
             BallotRelayRequest ballotRelayRequest = new BallotRelayRequest();
             ballotRelayRequest.setMask(mask.getMask().toString(DEFAULT_RADIX));
-            ballotRelayRequest.setPermutation(permutationDAO.findById(id).get().getPermutation());
+            ballotRelayRequest.setPermutation(permutationDAO.findByFrom(id).get().getTo());
             String body = gson.toJson(ballotRelayRequest);
             log.warn(String.format("Sending masked ballot request to registrar: %s", body));
             ResponseEntity<String> response =
@@ -120,10 +120,13 @@ public class ModeratorServiceImpl implements IModeratorService {
         List<PermutationME> out = new ArrayList<>();
         for (Long i = new Long(1);i<=n;i++){
             permutationME = new PermutationME();
-            permutationME.setPermutation(i);
+            permutationME.setFrom(i);
             out.add(permutationME);
         }
         Collections.shuffle(out);
+        for (int l = out.size();l<=n;l++){
+        out.get(l).setTo(l);
+        }
         permutationDAO.deleteAll();
         permutationDAO.saveAll(out);
         return "Permutation generated successfully";

@@ -88,7 +88,7 @@ public class RegistrarController {
             method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<String> getNRolls(HttpEntity<String> httpEntity) throws Exception {
-        log.warn("Received request for ballot");
+        log.warn("Received request for getNRolls");
         long n = registrarService.handleGetNRolls();
         return new ResponseEntity<>(gson.toJson(n), HttpStatus.OK);
     }

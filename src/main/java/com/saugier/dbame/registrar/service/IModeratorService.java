@@ -1,4 +1,4 @@
-package com.saugier.dbame.moderator.service;
+package com.saugier.dbame.registrar.service;
 
 import com.saugier.dbame.core.model.web.BallotRequest;
 import com.saugier.dbame.core.model.web.BallotResponse;

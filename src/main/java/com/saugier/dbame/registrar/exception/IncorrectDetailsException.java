@@ -1,6 +1,6 @@
 package com.saugier.dbame.registrar.exception;
 
-import com.saugier.dbame.registrar.model.entity.PersonRE;
+import com.saugier.dbame.registrar.model.entity.mysql.PersonRE;
 
 public class IncorrectDetailsException extends Exception{
 

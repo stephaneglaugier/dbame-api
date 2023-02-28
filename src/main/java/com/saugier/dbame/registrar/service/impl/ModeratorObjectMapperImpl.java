@@ -1,9 +1,9 @@
-package com.saugier.dbame.moderator.service.impl;
+package com.saugier.dbame.registrar.service.impl;
 
 import com.saugier.dbame.core.model.base.*;
-import com.saugier.dbame.moderator.model.entity.ModeratorRelayME;
-import com.saugier.dbame.moderator.service.IModeratorObjectMapper;
-import com.saugier.dbame.core.model.entity.RollRE;
+import com.saugier.dbame.registrar.model.entity.h2.ModeratorRelayME;
+import com.saugier.dbame.registrar.service.IModeratorObjectMapper;
+import com.saugier.dbame.registrar.model.entity.mysql.RollRE;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;

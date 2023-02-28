@@ -1,13 +1,13 @@
-package com.saugier.dbame.moderator.model.entity;
+package com.saugier.dbame.registrar.model.entity.h2;
 
 import javax.persistence.*;
 
 @Entity
-@Table(name = "encrypted_ballots")
+@Table(name="moderator_relay")
 public class ModeratorRelayME {
 
     @Id
-//    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column

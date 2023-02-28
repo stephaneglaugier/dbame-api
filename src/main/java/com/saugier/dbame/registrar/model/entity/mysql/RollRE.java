@@ -1,4 +1,4 @@
-package com.saugier.dbame.core.model.entity;
+package com.saugier.dbame.registrar.model.entity.mysql;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -6,12 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Entity
+@Table(name = "roll")
 public class RollRE implements Serializable {
 
-    public RollRE(){};
-
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column

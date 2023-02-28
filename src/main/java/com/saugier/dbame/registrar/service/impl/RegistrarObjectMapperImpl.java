@@ -4,9 +4,9 @@ import com.saugier.dbame.core.model.base.Ballot;
 import com.saugier.dbame.core.model.base.Person;
 import com.saugier.dbame.core.model.base.Roll;
 import com.saugier.dbame.core.model.base.Signature;
-import com.saugier.dbame.registrar.model.entity.BallotRE;
-import com.saugier.dbame.registrar.model.entity.PersonRE;
-import com.saugier.dbame.registrar.model.entity.RollRE;
+import com.saugier.dbame.registrar.model.entity.h2.BallotRE;
+import com.saugier.dbame.registrar.model.entity.mysql.PersonRE;
+import com.saugier.dbame.registrar.model.entity.mysql.RollRE;
 import com.saugier.dbame.registrar.service.IRegistrarObjectMapper;
 import org.springframework.stereotype.Service;
 

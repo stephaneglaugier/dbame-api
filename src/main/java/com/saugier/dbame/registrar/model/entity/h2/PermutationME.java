@@ -1,16 +1,19 @@
-package com.saugier.dbame.moderator.model.entity;
+package com.saugier.dbame.registrar.model.entity.h2;
 
 import javax.persistence.*;
 
 @Entity
+@Table(name="permutation_moderator")
 public class PermutationME {
 
     @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column
-    private long permutation;
+    @Column(name = "a")
+    private long from;
+
+    @Column(name = "b")
+    private long to;
 
     public long getId() {
         return id;
@@ -20,11 +23,19 @@ public class PermutationME {
         this.id = id;
     }
 
-    public long getPermutation() {
-        return permutation;
+    public long getFrom() {
+        return from;
     }
 
-    public void setPermutation(long permutation) {
-        this.permutation = permutation;
+    public void setFrom(long from) {
+        this.from = from;
+    }
+
+    public long getTo() {
+        return to;
+    }
+
+    public void setTo(long to) {
+        this.to = to;
     }
 }

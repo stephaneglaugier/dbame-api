@@ -1,4 +1,4 @@
-package com.saugier.dbame.registrar.model.entity;
+package com.saugier.dbame.registrar.model.entity.h2;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -11,7 +11,7 @@ public class BallotRE implements Serializable {
     private static final String SEPARATOR = "||";
 
     @Id
-//    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column
