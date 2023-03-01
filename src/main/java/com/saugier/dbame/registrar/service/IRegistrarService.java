@@ -15,5 +15,4 @@ public interface IRegistrarService {
 
     ElectionParams handleElectionParams() throws DecoderException, Exception;
 
-    long handleGetNRolls() throws Exception;
 }

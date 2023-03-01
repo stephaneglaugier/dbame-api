@@ -11,9 +11,8 @@ import com.saugier.dbame.core.model.web.BallotRequest;
 import com.saugier.dbame.core.model.web.BallotResponse;
 import com.saugier.dbame.core.service.IBaseObjectMapper;
 import com.saugier.dbame.core.service.ICryptoService;
-import com.saugier.dbame.registrar.model.entity.h2.ModeratorRelayME;
+import com.saugier.dbame.registrar.exception.PublicKeyNotFoundException;
 import com.saugier.dbame.registrar.model.entity.h2.PermutationME;
-import com.saugier.dbame.registrar.repository.h2.IEncryptedBallotDAO;
 import com.saugier.dbame.registrar.repository.h2.IPermutationDAO;
 import com.saugier.dbame.registrar.service.IModeratorObjectMapper;
 import com.saugier.dbame.registrar.service.IModeratorService;
@@ -23,6 +22,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -48,9 +48,6 @@ public class ModeratorServiceImpl implements IModeratorService {
     IRollDAO rollDAO;
 
     @Autowired
-    IEncryptedBallotDAO encryptedBallotDAO;
-
-    @Autowired
     IPermutationDAO permutationDAO;
 
     @Autowired
@@ -59,43 +56,36 @@ public class ModeratorServiceImpl implements IModeratorService {
     @Autowired
     IBaseObjectMapper baseObjectMapper;
 
-    
+
     public BallotResponse handleRequestBallot(BallotRequest ballotRequest) throws Exception {
+        if (ballotRequest == null) {
+            throw new IllegalArgumentException("Ballot request cannot be null");
+        }
 
         Person person = baseObjectMapper.map(ballotRequest);
-
         RollRE rollRE = moderatorObjectMapper.map(person.getRoll());
 
         Optional<RollRE> record = rollDAO.findByY(rollRE.getY());
-        if (!record.isPresent()){
-            throw new Exception("public key not found in electoral roll");
+        if (!record.isPresent()) {
+            throw new PublicKeyNotFoundException("Public key not found in electoral roll", rollRE.getY());
         }
+
         long id = record.get().getId();
+        if (!cryptoService.validate(person.getRoll())) {
+            throw new InvalidSignatureException("Roll signature was invalid.");
+        }
 
-        if(cryptoService.validate(person.getRoll())){
+        Mask mask = cryptoService.mask(person.getRoll().getPublicKey());
+        BallotRelayRequest ballotRelayRequest = new BallotRelayRequest();
+        ballotRelayRequest.setMask(mask.getMask().toString(DEFAULT_RADIX));
+        ballotRelayRequest.setPermutation(permutationDAO.findById(id).get().getPermutation());
+        String body = gson.toJson(ballotRelayRequest);
+        log.warn(String.format("Sending masked ballot request to registrar: %s", body));
 
-            Mask mask = cryptoService.mask(person.getRoll().getPublicKey());
-            BallotRelayRequest ballotRelayRequest = new BallotRelayRequest();
-            ballotRelayRequest.setMask(mask.getMask().toString(DEFAULT_RADIX));
-            ballotRelayRequest.setPermutation(permutationDAO.findByFrom(id).get().getTo());
-            String body = gson.toJson(ballotRelayRequest);
-            log.warn(String.format("Sending masked ballot request to registrar: %s", body));
-            ResponseEntity<String> response =
-                    new RestTemplate().postForEntity("http://localhost:8080/registrar/requestBallot", body,  String.class);
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:8080/registrar/requestBallot", body, String.class);
             BallotRelayResponse ballotRelayResponse = gson.fromJson(response.getBody(), BallotRelayResponse.class);
-
-
-            // Save all important data under one object for now
-            ModeratorRelayME moderatorRelayME = new ModeratorRelayME();
-            moderatorRelayME.setY(ballotRequest.getPublicKey());
-            moderatorRelayME.setMaskedY(ballotRelayRequest.getMask());
-            moderatorRelayME.setW(ballotRequest.getW());
-            moderatorRelayME.setS(ballotRequest.getS());
-            moderatorRelayME.setPermutation(ballotRelayRequest.getPermutation());
-            moderatorRelayME.setBlindFactor(mask.getBlindFactor().toString(DEFAULT_RADIX));
-            moderatorRelayME.setCypherText(ballotRelayResponse.getEncryptedBallot());
-            moderatorRelayME.setEphemeralKey(ballotRelayResponse.getEphemeralKey());
-            encryptedBallotDAO.save(moderatorRelayME);
 
             EncryptedBlindFactor encryptedBlindFactor = cryptoService.encrypt(mask.getBlindFactor(), person.getRoll().getPublicKey());
 
@@ -106,29 +96,39 @@ public class ModeratorServiceImpl implements IModeratorService {
 
             log.warn("bi: " + mask.getBlindFactor().toString(DEFAULT_RADIX));
             return out;
-        } else {
-            throw new InvalidSignatureException("Roll signature was invalid.");
+        } catch (RestClientException e) {
+            log.error("Error communicating with registrar: " + e.getMessage());
+            throw new RuntimeException("Error communicating with registrar", e);
         }
     }
 
-    
+
     public String handleGeneratePermutation() throws Exception {
-        ResponseEntity<Long> response =
-                new RestTemplate().getForEntity("http://localhost:8080/registrar/getNRolls", Long.class);
-        long n = response.getBody();
-        PermutationME permutationME;
+        Long n = rollDAO.getMaxId();
+        if (n == null) {
+            throw new Exception("Unable to retrieve number of rolls");
+        }
         List<PermutationME> out = new ArrayList<>();
-        for (Long i = new Long(1);i<=n;i++){
-            permutationME = new PermutationME();
-            permutationME.setFrom(i);
+        for (Long i = 1L; i <= n; i++) {
+            PermutationME permutationME = new PermutationME();
+            permutationME.setPermutation(i);
             out.add(permutationME);
         }
         Collections.shuffle(out);
-        for (int l = out.size();l<=n;l++){
-        out.get(l).setTo(l);
+        for (int i = 0; i < n; i++) {
+            PermutationME permutationME = out.get(i);
+            permutationME.setId(i+1);
         }
-        permutationDAO.deleteAll();
-        permutationDAO.saveAll(out);
-        return "Permutation generated successfully";
+        try {
+            permutationDAO.deleteAll(); // TODO not working
+            long countAfterDelete = permutationDAO.count();
+            if (countAfterDelete != 0) {
+                throw new Exception("Error deleting permutations: not all records were deleted.");
+            }
+            permutationDAO.saveAll(out);
+            return "Permutation generated successfully";
+        } catch (Exception e) {
+            throw new Exception("Error saving permutations: " + e.getMessage());
+        }
     }
 }

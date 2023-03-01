@@ -98,7 +98,7 @@ public class RegistrarServiceImpl implements IRegistrarService {
 
     
     public String handleGenerateBallots() throws Exception {
-        if (ballotDAO.count() > 0) {
+        if (ballotDAO.count() == rollDAO.getMaxId()) {
             return "Ballots have already been generated";
         }
         if (rollDAO.count() < 1){
@@ -111,7 +111,7 @@ public class RegistrarServiceImpl implements IRegistrarService {
     public void generateBallots() throws Exception {
         long startTime = System.nanoTime();
 
-        long n = rollDAO.count();
+        long n = rollDAO.getMaxId();
         List<Long> permutation = generatePermutation(n);
         List<BallotRE> ballots = new ArrayList<>();
         for (int i=0;i<n;i++){
@@ -120,6 +120,7 @@ public class RegistrarServiceImpl implements IRegistrarService {
             b.setRandint(ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
             Ballot sb = cryptoService.sign(b);
             BallotRE sbRE = registrarObjectMapper.map(sb, permutation.get(i));
+            sbRE.setId(i);
             ballots.add(sbRE);
         }
 
@@ -163,10 +164,5 @@ public class RegistrarServiceImpl implements IRegistrarService {
     
     public ElectionParams handleElectionParams() throws Exception {
         return electionService.asElectionParams();
-    }
-
-    @Override
-    public long handleGetNRolls() throws Exception {
-        return rollDAO.count();
     }
 }

@@ -9,11 +9,8 @@ public class PermutationME {
     @Id
     private long id;
 
-    @Column(name = "a")
-    private long from;
-
-    @Column(name = "b")
-    private long to;
+    @Column(name = "permutation")
+    private long permutation;
 
     public long getId() {
         return id;
@@ -23,19 +20,11 @@ public class PermutationME {
         this.id = id;
     }
 
-    public long getFrom() {
-        return from;
+    public long getPermutation() {
+        return permutation;
     }
 
-    public void setFrom(long from) {
-        this.from = from;
-    }
-
-    public long getTo() {
-        return to;
-    }
-
-    public void setTo(long to) {
-        this.to = to;
+    public void setPermutation(long permutation) {
+        this.permutation = permutation;
     }
 }

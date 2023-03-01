@@ -57,6 +57,4 @@ public class ModeratorController {
         String out = moderatorService.handleGeneratePermutation();
         return new ResponseEntity<>(out, HttpStatus.OK);
     }
-
-    // TODO read RollREs from Registrar API call
 }

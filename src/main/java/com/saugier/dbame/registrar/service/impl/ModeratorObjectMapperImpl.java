@@ -1,7 +1,6 @@
 package com.saugier.dbame.registrar.service.impl;
 
 import com.saugier.dbame.core.model.base.*;
-import com.saugier.dbame.registrar.model.entity.h2.ModeratorRelayME;
 import com.saugier.dbame.registrar.service.IModeratorObjectMapper;
 import com.saugier.dbame.registrar.model.entity.mysql.RollRE;
 import org.springframework.stereotype.Service;
@@ -35,20 +34,4 @@ public class ModeratorObjectMapperImpl implements IModeratorObjectMapper {
         return out;
     }
 
-    
-    public ModeratorRelayME map(EncryptedBallot ec, MaskedRequest mr, Roll roll, Mask mask) {
-
-        ModeratorRelayME out = new ModeratorRelayME();
-
-        out.setY(roll.getPublicKey().toString(DEFAULT_RADIX));
-        out.setMaskedY(mr.getMaskedData().toString(DEFAULT_RADIX));
-        out.setW(roll.getSignature().getW().toString(DEFAULT_RADIX));
-        out.setS(roll.getSignature().getS().toString(DEFAULT_RADIX));
-        out.setPermutation(mr.getPermutation());
-        out.setBlindFactor(mask.getMask().toString(DEFAULT_RADIX));
-        out.setCypherText(ec.getCypherText());
-        out.setEphemeralKey(ec.getEphemeralKey().toString(DEFAULT_RADIX));
-
-        return out;
-    }
 }

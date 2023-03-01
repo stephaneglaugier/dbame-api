@@ -11,7 +11,6 @@ public class BallotRE implements Serializable {
     private static final String SEPARATOR = "||";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column
