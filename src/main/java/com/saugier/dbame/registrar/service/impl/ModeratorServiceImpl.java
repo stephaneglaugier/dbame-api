@@ -11,6 +11,7 @@ import com.saugier.dbame.core.model.web.BallotRequest;
 import com.saugier.dbame.core.model.web.BallotResponse;
 import com.saugier.dbame.core.service.IBaseObjectMapper;
 import com.saugier.dbame.core.service.ICryptoService;
+import com.saugier.dbame.registrar.exception.AlreadyGeneratedException;
 import com.saugier.dbame.registrar.exception.PublicKeyNotFoundException;
 import com.saugier.dbame.registrar.model.entity.h2.PermutationME;
 import com.saugier.dbame.registrar.repository.h2.IPermutationDAO;
@@ -20,6 +21,8 @@ import com.saugier.dbame.registrar.model.entity.mysql.RollRE;
 import com.saugier.dbame.registrar.repository.mysql.IRollDAO;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -56,6 +59,9 @@ public class ModeratorServiceImpl implements IModeratorService {
     @Autowired
     IBaseObjectMapper baseObjectMapper;
 
+    @Value("${registrar.address.url}")
+    private String registrarURL;
+
 
     public BallotResponse handleRequestBallot(BallotRequest ballotRequest) throws Exception {
         if (ballotRequest == null) {
@@ -84,7 +90,7 @@ public class ModeratorServiceImpl implements IModeratorService {
 
         try {
             RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:8080/registrar/requestBallot", body, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(registrarURL+"/registrar/requestBallot", body, String.class);
             BallotRelayResponse ballotRelayResponse = gson.fromJson(response.getBody(), BallotRelayResponse.class);
 
             EncryptedBlindFactor encryptedBlindFactor = cryptoService.encrypt(mask.getBlindFactor(), person.getRoll().getPublicKey());
@@ -94,7 +100,7 @@ public class ModeratorServiceImpl implements IModeratorService {
             out.setEphemeralKey(ballotRelayResponse.getEphemeralKey());
             out.setEncryptedBlindFactor(baseObjectMapper.map(encryptedBlindFactor));
 
-            log.warn("bi: " + mask.getBlindFactor().toString(DEFAULT_RADIX));
+//            log.warn("bi: " + mask.getBlindFactor().toString(DEFAULT_RADIX));
             return out;
         } catch (RestClientException e) {
             log.error("Error communicating with registrar: " + e.getMessage());
@@ -104,6 +110,10 @@ public class ModeratorServiceImpl implements IModeratorService {
 
 
     public String handleGeneratePermutation() throws Exception {
+        long count;
+        if ((count = permutationDAO.count()) > 0){
+            throw new AlreadyGeneratedException(String.format("Permutation of length %s already exists.", count));
+        }
         Long n = rollDAO.getMaxId();
         if (n == null) {
             throw new Exception("Unable to retrieve number of rolls");
@@ -120,11 +130,6 @@ public class ModeratorServiceImpl implements IModeratorService {
             permutationME.setId(i+1);
         }
         try {
-            permutationDAO.deleteAll(); // TODO not working
-            long countAfterDelete = permutationDAO.count();
-            if (countAfterDelete != 0) {
-                throw new Exception("Error deleting permutations: not all records were deleted.");
-            }
             permutationDAO.saveAll(out);
             return "Permutation generated successfully";
         } catch (Exception e) {

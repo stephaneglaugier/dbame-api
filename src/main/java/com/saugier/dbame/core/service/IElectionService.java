@@ -10,16 +10,22 @@ import java.util.List;
 @Service
 public interface IElectionService {
 
-    public String getDbameVersion();
+    String getDbameVersion();
 
-    public BigInteger getP();
+    BigInteger getP();
 
-    public BigInteger getG();
+    BigInteger getG();
 
-    public byte[] getIv() throws DecoderException;
+    byte[] getIv() throws DecoderException;
 
-    public List<String> getCandidates();
+    List<String> getCandidates();
 
-    public ElectionParams asElectionParams() throws DecoderException;
+    String getContractAddress();
+
+    String getContractNetwork();
+
+    String getElectionState();
+
+    ElectionParams asElectionParams() throws DecoderException;
 }
 

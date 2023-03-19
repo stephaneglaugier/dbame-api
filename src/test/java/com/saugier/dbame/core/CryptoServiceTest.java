@@ -61,6 +61,4 @@ class CryptoServiceTest {
         roll = cryptoService.sign(roll);
         assertTrue(cryptoService.validate(roll));
     }
-
-
 }

@@ -14,5 +14,4 @@ public interface IRegistrarService {
     BallotRelayResponse handleRequestBallot(BallotRelayRequest ballotRelayRequest) throws Exception;
 
     ElectionParams handleElectionParams() throws DecoderException, Exception;
-
-}
+    }

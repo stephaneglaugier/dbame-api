@@ -184,10 +184,10 @@ public class CryptoServiceImpl implements ICryptoService {
         log.warn("password = " + password.toString(DEFAULT_RADIX));
 
         byte[] fLBAKey = java.util.Arrays.copyOf(password.toByteArray() , 32); // TODO replace with key size
-        log.warn("fLBAKey = " + Arrays.toString(fLBAKey));
+//        log.warn("fLBAKey = " + Arrays.toString(fLBAKey));
 
         Key secretKey = new SecretKeySpec(fLBAKey, "AES");
-        log.warn("secretKey = " + Arrays.toString(secretKey.getEncoded()));
+//        log.warn("secretKey = " + Arrays.toString(secretKey.getEncoded()));
 
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
@@ -195,11 +195,11 @@ public class CryptoServiceImpl implements ICryptoService {
 
         byte[] encrypted = cipher.doFinal(message.getBytes());
         String encoded = Base64.getEncoder().encodeToString(encrypted);
-        log.warn("encrypted = " + Arrays.toString(encrypted));
+//        log.warn("encrypted = " + Arrays.toString(encrypted));
         log.warn("encoded = " + encoded);
 
         Key secretKey2 = new SecretKeySpec(fLBAKey, "AES");
-        log.warn("secretKey2 = " + Arrays.toString(secretKey2.getEncoded()));
+//        log.warn("secretKey2 = " + Arrays.toString(secretKey2.getEncoded()));
 
         Cipher cipher2 = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher2.init(Cipher.DECRYPT_MODE, secretKey2, new IvParameterSpec(iv));
@@ -207,8 +207,8 @@ public class CryptoServiceImpl implements ICryptoService {
 
         byte[] decoded = Base64.getDecoder().decode(encoded);
         byte[] decrypted = cipher2.doFinal(decoded);
-        log.warn("decoded = " + Arrays.toString(decoded));
-        log.warn("decrypted = " + new String(decrypted));
+//        log.warn("decoded = " + Arrays.toString(decoded));
+//        log.warn("decrypted = " + new String(decrypted));
 
         return encoded;
     }
@@ -232,6 +232,14 @@ public class CryptoServiceImpl implements ICryptoService {
         BigInteger c1 = generator.modPow(_rm, prime);
         BigInteger c2 = blindFactor.multiply(voterPublicKey.modPow(_rm, prime));
         EncryptedBlindFactor out = new EncryptedBlindFactor(c1, c2);
+
+        log.warn(
+            String.format(
+                "encrypting blind factor %s with key %s",
+                blindFactor.toString(DEFAULT_RADIX),
+                voterPublicKey.toString(DEFAULT_RADIX)
+            )
+        );
 
         return out;
     }

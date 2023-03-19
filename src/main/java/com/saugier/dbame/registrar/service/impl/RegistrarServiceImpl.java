@@ -12,6 +12,7 @@ import com.saugier.dbame.core.service.IElectionService;
 import com.saugier.dbame.registrar.exception.AlreadyRegisteredException;
 import com.saugier.dbame.registrar.exception.IdNotFoundException;
 import com.saugier.dbame.registrar.exception.IncorrectDetailsException;
+import com.saugier.dbame.registrar.exception.NotRegisteredException;
 import com.saugier.dbame.registrar.model.entity.h2.BallotRE;
 import com.saugier.dbame.registrar.model.entity.mysql.PersonRE;
 import com.saugier.dbame.registrar.repository.mysql.IPersonDAO;
@@ -21,6 +22,8 @@ import com.saugier.dbame.registrar.service.IRegistrarObjectMapper;
 import com.saugier.dbame.registrar.service.IRegistrarService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -69,6 +72,10 @@ public class RegistrarServiceImpl implements IRegistrarService {
             return baseObjectMapper.map(e.getPerson());
         }
 
+        if (!electionService.getElectionState().equalsIgnoreCase("registration")){
+            throw new NotRegisteredException("ERROR: you have not registered to vote", person.getId());
+        }
+
         RegistrationResponse out = registerVoter(person);
         return out;
     }
@@ -95,7 +102,6 @@ public class RegistrarServiceImpl implements IRegistrarService {
 
         return baseObjectMapper.map(person);
     }
-
     
     public String handleGenerateBallots() throws Exception {
         if (ballotDAO.count() == rollDAO.getMaxId()) {

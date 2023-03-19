@@ -30,6 +30,22 @@ public class ElectionServiceImpl implements IElectionService {
     @Value("#{'${global.candidates}'.split(',')}")
     private List<String> candidates;
 
+    @Value("${global.contract.address}")
+    private String contractAddress;
+
+    @Value("${global.contract.network}")
+    private String contractNetwork;
+
+    @Value("${global.node.url}")
+    private String votingNode;
+
+    @Value("${global.client.url}")
+    private String votingClient;
+
+    @Value("${global.election.state}")
+    private String electionState;
+
+
     
     public String getDbameVersion() {
         return dbameVersion;
@@ -55,14 +71,38 @@ public class ElectionServiceImpl implements IElectionService {
         return candidates;
     }
 
-    
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public String getContractNetwork() {
+        return contractNetwork;
+    }
+
+    public String getVotingNode() {
+        return votingNode;
+    }
+
+    public String getVotingClient() {
+        return votingClient;
+    }
+
+    public String getElectionState() {
+        return electionState;
+    }
+
     public ElectionParams asElectionParams() throws DecoderException {
         return new ElectionParams(
                 getDbameVersion(),
                 getP(),
                 getG(),
                 getIv(),
-                getCandidates()
+                getCandidates(),
+                getContractAddress(),
+                getContractNetwork(),
+                getVotingNode(),
+                getVotingClient(),
+                getElectionState()
         );
     }
 }

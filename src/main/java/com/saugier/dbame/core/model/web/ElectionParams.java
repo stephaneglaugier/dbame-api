@@ -14,47 +14,24 @@ public class ElectionParams {
     private final String g;
     private final String iv;
     private final String[] candidates;
-
-
-    public ElectionParams(
-            String dbameVersion, String p, String g, String iv,
-            String[] candidates) {
-        this.dbameVersion = dbameVersion;
-        this.p = p;
-        this.g = g;
-        this.iv = iv;
-        this.candidates = candidates;
-    }
+    private final String contractAddress;
+    private final String contractNetwork;
+    private final String votingNode;
+    private final String votingClient;
+    private final String electionState;
 
     public ElectionParams(
             String dbameVersion, BigInteger p, BigInteger g, byte[] iv,
-            List<String> candidates) {
+            List<String> candidates, String contractAddress, String contractNetwork, String votingNode, String votingClient, String electionState) {
         this.dbameVersion = dbameVersion;
         this.p = p.toString(DEFAULT_RADIX);
         this.g = g.toString(DEFAULT_RADIX);
         this.iv = Hex.encodeHexString(iv);
         this.candidates = candidates.toArray(new String[0]);
-    }
-
-
-    public String getDbameVersion() {
-        return dbameVersion;
-    }
-
-    public String getP() {
-        return p;
-    }
-
-    public String getG() {
-        return g;
-    }
-
-    public String getIv() {
-        return iv;
-    }
-
-
-    public String[] getCandidates() {
-        return candidates;
+        this.contractAddress = contractAddress;
+        this.contractNetwork = contractNetwork;
+        this.votingNode = votingNode;
+        this.votingClient = votingClient;
+        this.electionState = electionState;
     }
 }
