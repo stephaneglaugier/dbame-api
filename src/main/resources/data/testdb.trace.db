@@ -211,3 +211,12 @@ Caused by: org.h2.jdbc.JdbcSQLInvalidAuthorizationSpecException: Wrong user name
 2023-03-19 15:44:17 jdbc[13]: exception
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "delete from [*]*"; expected "identifier"; SQL statement:
 delete from * [42001-214]
+2023-03-19 16:24:14 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Value too long for column "W CHARACTER VARYING(255)": "'d3dde98d175ce92a3b393eee0880453671affbe8a1b97031c38df1575caa9cc1026adae1a0fc282... (512)"; SQL statement:
+insert into ballots (permutation, randint, s, timestamp, w, id) values (?, ?, ?, ?, ?, ?) [22001-214]
+2023-03-19 16:27:34 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Value too long for column "W CHARACTER VARYING(256)": "'de57c5e74596a92b51b510becc8f86621c389838d3ca9256040594113525349160c103df71e9623... (512)"; SQL statement:
+insert into ballots (permutation, randint, s, timestamp, w, id) values (?, ?, ?, ?, ?, ?) [22001-214]
+2023-03-19 16:27:40 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Value too long for column "W CHARACTER VARYING(256)": "'adf0b9d949b4f4a345d2c8476ef83ecd6913304ce08882af36ae338f10f8bc32e9b934fc2efed52... (512)"; SQL statement:
+insert into ballots (permutation, randint, s, timestamp, w, id) values (?, ?, ?, ?, ?, ?) [22001-214]
