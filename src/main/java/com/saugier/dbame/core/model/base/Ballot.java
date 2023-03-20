@@ -21,15 +21,17 @@ public class Ballot {
      */
     public String asMessage(){
 
-        String _id = pad(Long.toHexString(id), 16);
+        String _id = pad(Long.toHexString(id), 8);
         String _timestamp = pad(Long.toHexString(timestamp.toInstant().getEpochSecond()), 8);
         String _randint = pad(Integer.toHexString(randint), 8);
+        String _zeros = "00000000";
 
 
         String s =  new String()
                 .concat(_id)
                 .concat(_timestamp)
-                .concat(_randint);
+                .concat(_randint)
+                .concat(_zeros);
         if (s.length() != 32) throw new RuntimeException(String.format("Ballot is not 256 bits: %s"));
         return s;
     }

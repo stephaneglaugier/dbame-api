@@ -14,6 +14,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.SecureRandom;
 import java.util.*;
@@ -161,30 +162,15 @@ public class CryptoServiceImpl implements ICryptoService {
 
     private String AESEncrypt(String message, BigInteger password) throws Exception {
 
-//        byte[] salt = Hex.decodeHex("123456");
-//        int iterationCount = 100;
-//        int keySize = 128;
-//        byte[] iv = Hex.decodeHex("F27D5C9927726BCEFE7510B1BDD3D137");
-//
-//        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-//
-//        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-//        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, iterationCount, keySize);
-//        SecretKey key = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
-//
-//        cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
-//        byte[] encrypted = cipher.doFinal(message.getBytes());
-//
-//        String encoded = Base64.getEncoder().encodeToString(encrypted);
-//
-//        return encoded;
-
-
         log.warn("message = " + message);
-        log.warn("password = " + password.toString(DEFAULT_RADIX));
+        log.warn("full password = " + password.toString(DEFAULT_RADIX));
 
-        byte[] fLBAKey = java.util.Arrays.copyOf(password.toByteArray() , 32); // TODO replace with key size
-//        log.warn("fLBAKey = " + Arrays.toString(fLBAKey));
+        String passwordString = keyToPassword(password, 32);
+
+        log.warn("password = " + passwordString);
+
+        byte[] fLBAKey = passwordString.getBytes(StandardCharsets.UTF_8);
+        log.warn("fLBAKey = " + Arrays.toString(fLBAKey));
 
         Key secretKey = new SecretKeySpec(fLBAKey, "AES");
 //        log.warn("secretKey = " + Arrays.toString(secretKey.getEncoded()));
@@ -211,6 +197,44 @@ public class CryptoServiceImpl implements ICryptoService {
 //        log.warn("decrypted = " + new String(decrypted));
 
         return encoded;
+    }
+
+    /**
+     * Converts a BigInteger key into a password string of a specified length.
+     *
+     * @param key     The BigInteger key to be converted into a password string.
+     * @param length  The desired length of the resulting password string.
+     * @return        A password string of the specified length derived from the BigInteger key.
+     * @throws Exception If the resulting password string's length does not match the specified length.
+     *
+     * This method converts a given BigInteger key into a password string with a specified length.
+     * If the length of the key string is greater than the specified length, it adds leading zeros
+     * until the desired length is reached. If the length of the key string is smaller than the specified
+     * length, it truncates the key string from the left side until the desired length is reached.
+     * If the length of the resulting password string is not equal to the specified length,
+     * an exception is thrown.
+     */
+    private String keyToPassword(BigInteger key, int length) throws Exception{
+        String _keyString = key.toString(DEFAULT_RADIX);
+        String out;
+
+        if (_keyString.length() < length) {
+            int nZeros = length - _keyString.length();
+            String zeros = "";
+            for (int i=0; i < nZeros; i++){
+                zeros = zeros + "0";
+            }
+            out = zeros + _keyString;
+        } else if (_keyString.length() > length) {
+            out = _keyString.substring(_keyString.length()-length);
+        } else {
+            out = _keyString;
+        }
+
+        if (out.length() != length) {
+            throw new Exception(String.format("Error when converting key to password. %s != %s", out.length(), length));
+        }
+        return out;
     }
 
     
