@@ -28,22 +28,6 @@ public class BallotRE implements Serializable {
     @Column
     private long permutation;
 
-    /**
-     * Returns a 256-bit representation of the BallotRE's attributes as a 32-byte String with padded zeros.
-     * @return 0x{id||timestamp||randint}
-     */
-    public String to256Hex(){
-        String out =  new String()
-                .concat(Long.toHexString(id))//.concat(SEPARATOR)
-                .concat(Long.toHexString(timestamp.toInstant().getEpochSecond()))//.concat(SEPARATOR)
-                .concat(Integer.toHexString(randint));
-        if (out.length() > 32) throw new RuntimeException("BallotRE is greater than 256 bits.");
-        while (out.length() < 32){
-            out = "0" + out;
-        }
-        return out;
-    }
-
     public static String getSEPARATOR() {
         return SEPARATOR;
     }

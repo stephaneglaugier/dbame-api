@@ -19,10 +19,12 @@ public class ElectionParams {
     private final String votingNode;
     private final String votingClient;
     private final String electionState;
+    private final String yR;
+    private final String yM;
 
     public ElectionParams(
             String dbameVersion, BigInteger p, BigInteger g, byte[] iv,
-            List<String> candidates, String contractAddress, String contractNetwork, String votingNode, String votingClient, String electionState) {
+            List<String> candidates, String contractAddress, String contractNetwork, String votingNode, String votingClient, String electionState, String yR, String yM) {
         this.dbameVersion = dbameVersion;
         this.p = p.toString(DEFAULT_RADIX);
         this.g = g.toString(DEFAULT_RADIX);
@@ -33,5 +35,7 @@ public class ElectionParams {
         this.votingNode = votingNode;
         this.votingClient = votingClient;
         this.electionState = electionState;
+        this.yR = yR;
+        this.yM = yM;
     }
 }

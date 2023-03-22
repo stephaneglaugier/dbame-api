@@ -8,4 +8,6 @@ import org.springframework.stereotype.Service;
 public interface IModeratorService {
     BallotResponse handleRequestBallot(BallotRequest ballotRequest) throws Exception;
     String handleGeneratePermutation() throws Exception;
+
+    String handleGetPrivateKey();
 }

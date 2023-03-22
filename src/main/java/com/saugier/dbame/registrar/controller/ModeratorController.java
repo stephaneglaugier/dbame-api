@@ -68,4 +68,18 @@ public class ModeratorController {
         String out = moderatorService.handleGeneratePermutation();
         return new ResponseEntity<>(out, HttpStatus.OK);
     }
+
+    @RequestMapping(
+            value = "/getPrivateKey",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<String> getPrivateKey(HttpEntity<String> httpEntity) throws Exception {
+        if (electionService.getElectionState().equalsIgnoreCase("closed")) {
+            log.warn("Received request for private key");
+            String jsonResponse = moderatorService.handleGetPrivateKey();
+            return new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("the election is not yet closed", HttpStatus.SERVICE_UNAVAILABLE);
+        }
+    }
 }

@@ -14,10 +14,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("registrar")
@@ -98,6 +95,22 @@ public class RegistrarController {
             return new ResponseEntity<>(gson.toJson(out), HttpStatus.OK);
         } else {
             return new ResponseEntity<>("voting is not available", HttpStatus.SERVICE_UNAVAILABLE);
+        }
+
+    }
+
+    @CrossOrigin(origins = "*")
+    @RequestMapping(
+            value = "/closed",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<String> closed(HttpEntity<String> httpEntity) throws Exception {
+        if (electionService.getElectionState().equalsIgnoreCase("closed")) {
+            log.warn("Received request for closed");
+            String jsonResponse = registrarService.handleClosed();
+            return new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("the election is not yet closed", HttpStatus.SERVICE_UNAVAILABLE);
         }
 
     }

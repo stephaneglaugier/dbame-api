@@ -28,10 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ModeratorServiceImpl implements IModeratorService {
@@ -61,6 +58,9 @@ public class ModeratorServiceImpl implements IModeratorService {
 
     @Value("${registrar.address.url}")
     private String registrarURL;
+
+    @Value("${moderator.key.private}")
+    private String privateKey;
 
 
     public BallotResponse handleRequestBallot(BallotRequest ballotRequest) throws Exception {
@@ -136,4 +136,15 @@ public class ModeratorServiceImpl implements IModeratorService {
             throw new Exception("Error saving permutations: " + e.getMessage());
         }
     }
+
+    @Override
+    public String handleGetPrivateKey() {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("xM", privateKey);
+        Gson gson = new Gson();
+        String jsonString = gson.toJson(variables);
+
+        return jsonString;
+    }
+
 }

@@ -1,6 +1,8 @@
 package com.saugier.dbame.registrar.service.impl;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.saugier.dbame.core.model.base.Ballot;
 import com.saugier.dbame.core.model.base.EncryptedBallot;
 import com.saugier.dbame.core.model.base.MaskedRequest;
@@ -22,10 +24,15 @@ import com.saugier.dbame.registrar.service.IRegistrarObjectMapper;
 import com.saugier.dbame.registrar.service.IRegistrarService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -33,6 +40,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class RegistrarServiceImpl implements IRegistrarService {
+
+    public static final int DEFAULT_RADIX = 16;
 
     @Autowired
     private Logger log;
@@ -60,6 +69,15 @@ public class RegistrarServiceImpl implements IRegistrarService {
 
     @Autowired
     private IBaseObjectMapper baseObjectMapper;
+
+    @Value("${moderator.address.url}")
+    private String moderatorURL;
+
+    @Value("${global.p}")
+    private String p;
+
+    @Value("${registrar.key.private}")
+    private String privateKey;
 
     
     public RegistrationResponse handleRegisterToVote(RegistrationRequest registrationRequest) throws Exception {
@@ -170,5 +188,57 @@ public class RegistrarServiceImpl implements IRegistrarService {
     
     public ElectionParams handleElectionParams() throws Exception {
         return electionService.asElectionParams();
+    }
+
+    @Override
+    public String handleClosed() throws Exception {
+
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("p", electionService.getP().toString(DEFAULT_RADIX));
+        variables.put("xR", privateKey);
+        variables.put("candidates", electionService.getCandidates());
+
+        // Get all the ballots
+        Iterable<BallotRE> allBallots = ballotDAO.findAll();
+        List<String> ballotHexList = new ArrayList<>();
+        for (BallotRE ballotRE : allBallots) {
+            Ballot ballot = registrarObjectMapper.map(ballotRE);
+            String ballotHex = ballot.asMessage();
+            log.warn(ballotHex);
+            ballotHexList.add(ballotHex);
+        }
+        variables.put("ballots", ballotHexList);
+
+        // Make GET request to retrieve xM from Moderator
+        String moderatorUrl = moderatorURL+"/moderator/getPrivateKey";
+        URL url = new URL(moderatorUrl);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                    connection.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            // Parse JSON response to retrieve xM
+            Gson gson = new Gson();
+            JsonObject jsonObject = gson.fromJson(response.toString(), JsonObject.class);
+            JsonElement xMElement = jsonObject.get("xM");
+            String xM = xMElement != null ? xMElement.getAsString() : null;
+            variables.put("xM", xM);
+        } else {
+            throw new Exception("Failed to retrieve xM from Moderator. Response code: " + responseCode);
+        }
+
+        String jsonString = gson.toJson(variables);
+
+        return jsonString;
     }
 }

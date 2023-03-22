@@ -45,7 +45,11 @@ public class ElectionServiceImpl implements IElectionService {
     @Value("${global.election.state}")
     private String electionState;
 
+    @Value("${registrar.key.public}")
+    private String yR;
 
+    @Value("${moderator.key.public}")
+    private String yM;
     
     public String getDbameVersion() {
         return dbameVersion;
@@ -91,6 +95,14 @@ public class ElectionServiceImpl implements IElectionService {
         return electionState;
     }
 
+    public String getyR() {
+        return yR;
+    }
+
+    public String getyM() {
+        return yM;
+    }
+
     public ElectionParams asElectionParams() throws DecoderException {
         return new ElectionParams(
                 getDbameVersion(),
@@ -102,7 +114,9 @@ public class ElectionServiceImpl implements IElectionService {
                 getContractNetwork(),
                 getVotingNode(),
                 getVotingClient(),
-                getElectionState()
+                getElectionState(),
+                getyR(),
+                getyM()
         );
     }
 }
