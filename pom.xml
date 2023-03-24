@@ -17,13 +17,6 @@
 		<java.version>1.8</java.version>
 	</properties>
 	<dependencies>
-<!--		<dependency>-->
-<!--			<groupId>com.saugier.dbame</groupId>-->
-<!--			<artifactId>dbame-core</artifactId>-->
-<!--			<version>0.0.1-SNAPSHOT</version>-->
-<!--			<scope></scope>-->
-<!--			<systemPath>C:/Repos/d-BAME/dbame-registrar/src/main/resources/localJARs/dbame-core.jar</systemPath>-->
-<!--		</dependency>-->
 		<dependency>
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>

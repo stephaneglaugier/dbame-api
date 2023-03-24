@@ -44,9 +44,6 @@ public class RegistrarController {
             method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<String> electionParams(HttpEntity<String> httpEntity) throws Exception {
-        if (electionService.getElectionState().equalsIgnoreCase("closed")){
-            return new ResponseEntity<>("election is closed", HttpStatus.SERVICE_UNAVAILABLE);
-        }
         log.warn("Received request for election parameters");
         ElectionParams out = registrarService.handleElectionParams();
         return new ResponseEntity<>(gson.toJson(out), HttpStatus.OK);
